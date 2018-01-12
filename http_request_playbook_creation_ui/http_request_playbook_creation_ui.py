@@ -4,6 +4,7 @@
 import json
 
 from flask import flash, Flask, render_template, redirect, request, url_for
+import requests
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -28,9 +29,14 @@ def index():
 
 @app.route("/json")
 def parse_json():
-    return render_template("json.html", responseData={
-        "foobar": "foobaz"
-    }, domain=request.args['domain'])
+    r = requests.get(request.args['domain'])
+
+    if r.ok:
+        return render_template("json.html", responseData=r.text, domain=request.args['domain'])
+    else:
+        print("Error requesting {}: {}".format(request.args['domain'], r.text))
+        # TODO: raise better error message here
+        return redirect(url_for('index'))
 
 
 @app.route("/pb", methods=['POST'])
