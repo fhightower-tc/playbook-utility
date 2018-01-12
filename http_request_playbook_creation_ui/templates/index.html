@@ -1,0 +1,7 @@
+(% extends "layout.html" %)
+(% block content %)
+<form action="(( url_for('parse_json') ))">
+    <input type="text" name="domain" placeholder="Enter the domain you would like to request...">
+    <input class="button" type="submit">
+</form>
+(% endblock %)

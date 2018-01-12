@@ -1,0 +1,48 @@
+(% extends "layout.html" %)
+(% block content %)
+
+<div hidden="hidden">
+    <input id="responseContent" type="text" value="(( responseData ))">
+</div>
+
+<div id="content">
+    <div class="columns">
+        <pre id="json-renderer"></pre>
+        <br><br><br>
+    </div>
+
+    <!-- TODO: could probably lay this out more cleanly -->
+    <div class="columns large-6">
+        <label>Json path:</label>
+        <input id="path" type="text" v-model="path" readonly>
+    </div>
+    <div class="columns large-6">
+        <label>Name of playbook output variable:</label>
+        <input id="name" type="text" v-model="name">
+        <br><br>
+    </div>
+
+    <ul>
+        <li v-for="path in jsonPaths">
+            {{ path.name }}: {{ path.path }}
+        </li>
+    </ul>
+
+    <br><br>
+    <button class="button secondary" v-on:click="addPath">Queue json path</button>
+    <br><br>
+
+    <form action="(( url_for('create_playbook') ))" method="post">
+        <input type="input" name="jsonPaths" hidden="hidden" :value="JSON.stringify(jsonPaths)">
+        <input type="input" name="domain" hidden="hidden" value="(( domain ))">
+        <input class="button float-right" type="submit" name="submit">
+    </form>
+</div>
+
+<script src="./static/parse-json.js"></script>
+<script type="text/javascript">
+    window.setTimeout(function() {
+        parseJson();
+    }, 400)
+</script>
+(% endblock %)
