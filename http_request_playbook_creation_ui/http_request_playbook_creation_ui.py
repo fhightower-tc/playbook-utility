@@ -29,12 +29,12 @@ def index():
 
 @app.route("/json")
 def parse_json():
-    r = requests.get(request.args['domain'])
+    r = requests.get(request.args['url'])
 
     if r.ok:
-        return render_template("json.html", responseData=r.text, domain=request.args['domain'])
+        return render_template("json.html", responseData=r.text, url=request.args['url'])
     else:
-        print("Error requesting {}: {}".format(request.args['domain'], r.text))
+        print("Error requesting {}: {}".format(request.args['url'], r.text))
         # TODO: raise better error message here
         return redirect(url_for('index'))
 
@@ -126,7 +126,7 @@ def create_playbook():
     reformatted_json = [{"key": path['name'], "value": path['path']} for path in json_paths]
     output_json = json.dumps(reformatted_json).replace('"', '\\"')
 
-    return (playbook_template % (request.form['domain'], output_json))
+    return (playbook_template % (request.form['url'], output_json))
 
 
 if __name__ == '__main__':

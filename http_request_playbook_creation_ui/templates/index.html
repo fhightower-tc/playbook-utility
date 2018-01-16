@@ -1,7 +1,11 @@
 (% extends "layout.html" %)
 (% block content %)
 <form action="(( url_for('parse_json') ))">
-    <input type="text" name="domain" placeholder="Enter the domain you would like to request...">
-    <input class="button" type="submit">
+    <input type="text" name="url" placeholder="Enter the url you would like to request...">
+    <input class="button blue" type="submit">
 </form>
+
+<br><br>
+
+<a href="(( url_for('parse_json', url='http://headers.jsontest.com/') ))">Try 'http://headers.jsontest.com/'</a>
 (% endblock %)

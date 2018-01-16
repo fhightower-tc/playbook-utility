@@ -2,14 +2,14 @@
 ul.json-dict, ol.json-array {
   list-style-type: none;
   margin: 0 0 0 1px;
-  border-left: 1px dotted #ccc;
+  border-left: 1px dotted #666666;
   padding-left: 2em;
 }
 .json-string {
   color: #0B7500;
 }
 .json-literal {
-  color: #1A01CC;
+  color: #0072CE;
   font-weight: bold;
 }
 
