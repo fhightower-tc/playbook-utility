@@ -23,7 +23,6 @@ app.secret_key = 'abc'
 
 @app.route("/")
 def index():
-    # request.form['text']
     return render_template("index.html")
 
 
@@ -41,7 +40,7 @@ def parse_json():
 
 @app.route("/pb", methods=['POST'])
 def create_playbook():
-    playbook_template = """ "jobList": [{
+    partial_pb_template = """ "jobList": [{
         "id": 1,
         "appCatalogItem": {
             "programName": "Http Client",
@@ -122,11 +121,25 @@ def create_playbook():
         "targetJobId": 2
     }],"""
 
+    full_pb_template = """ {
+        "definitionVersion" : "1.0.0",
+        "name" : "%s Requester Playbook",
+        "panX" : 1392.0,
+        "panY" : 20.0,
+        "logLevel" : "WARNING",
+        "description" : "Playbook that makes requests to %s and parses the json.",
+        %s
+        "playbookTriggerList" : [ ],
+        "dateExported" : "1/12/18 7:17 PM"
+    }"""
+
     json_paths = json.loads(request.form['jsonPaths'])
     reformatted_json = [{"key": path['name'], "value": path['path']} for path in json_paths]
     output_json = json.dumps(reformatted_json).replace('"', '\\"')
 
-    return (playbook_template % (request.form['url'], output_json))
+    rendered_partial_pb_template = partial_pb_template % (request.form['url'], output_json)
+
+    return render_template("pb.html", partial_pb=rendered_partial_pb_template, full_pb=full_pb_template % (request.form['url'], request.form['url'], rendered_partial_pb_template))
 
 
 if __name__ == '__main__':

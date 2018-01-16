@@ -18,6 +18,11 @@ a {
     /*text-decoration-style: dotted;*/
 }
 
+.well {
+    margin: 1em;
+    padding: 1em;
+}
+
 .error {
     color: red;
 }

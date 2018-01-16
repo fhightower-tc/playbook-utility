@@ -1,0 +1,35 @@
+(% extends "layout.html" %)
+(% block content %)
+
+<h2>Complete Playbook <button class="button secondary float-right" onclick="copyPB('full-pb')">Copy complete playbook</button>
+</h2>
+
+<textarea id="full-pb" class="well" rows="30">
+    (( full_pb ))
+</textarea>
+
+<br><br><br><br><hr><br><br><br>
+
+<h2>Partial Playbook <button class="button secondary float-right" onclick="copyPB('partial-pb')">Copy partial playbook</button></h2>
+
+<textarea id="partial-pb" class="well" rows="30">
+    (( partial_pb ))
+</textarea>
+
+<script type="text/javascript">
+    function copyPB(playbookTextID) {
+        var playbookTextArea = document.getElementById(playbookTextID);
+
+        playbookTextArea.select();
+        var copied = document.execCommand("copy");
+
+        if (copied) {
+            playbookTextArea.blur();
+            $.jGrowl('Playbook copied', {group: 'success-growl'});
+        } else {
+            $.jGrowl('Unable to copy playbook', {group: 'failure-growl'});
+        }
+    }
+</script>
+
+(% endblock %)

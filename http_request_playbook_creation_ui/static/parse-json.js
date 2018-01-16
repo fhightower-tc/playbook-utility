@@ -34,5 +34,9 @@ var jsonPathVue = new Vue({
             });
             $.jGrowl('Path added!');
         },
+        nameFocus: function() {
+            /* Focus on the 'name' field. */
+            $('#name').focus();
+        }
     }
 });
