@@ -28,13 +28,19 @@ def index():
 
 @app.route("/json")
 def parse_json():
-    r = requests.get(request.args['url'])
+    if request.args.get('url'):
+        r = requests.get(request.args['url'])
 
-    if r.ok:
-        return render_template("json.html", responseData=r.text, url=request.args['url'])
+        if r.ok:
+            return render_template("json.html", responseData=r.text, url=request.args['url'])
+        else:
+            print("Error requesting {}: {}".format(request.args['url'], r.text))
+            # TODO: raise error message here
+            return redirect(url_for('index'))
+    elif request.args.get('json'):
+        return render_template("json.html", responseData=request.args['json'], url='N/A')
     else:
-        print("Error requesting {}: {}".format(request.args['url'], r.text))
-        # TODO: raise better error message here
+        # TODO: raise error message here
         return redirect(url_for('index'))
 
 

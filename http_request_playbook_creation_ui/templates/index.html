@@ -2,10 +2,15 @@
 (% block content %)
 <form action="(( url_for('parse_json') ))">
     <input type="text" name="url" placeholder="Enter the url you would like to request...">
-    <input class="button blue" type="submit">
+    <a href="(( url_for('parse_json', url='http://headers.jsontest.com/') ))">Try 'http://headers.jsontest.com/'</a>
+    <input class="button blue float-right" type="submit" value="Submit URL">
+
+    <br><br><br><br><br><br><br><br><br>
+
+    Alternatively, enter JSON here:
+    <br><br>
+    <textarea name="json" rows="20" placeholder="Enter json here..."></textarea>
+    <input class="button secondary float-right" type="submit" value="Submit JSON">
 </form>
 
-<br><br>
-
-<a href="(( url_for('parse_json', url='http://headers.jsontest.com/') ))">Try 'http://headers.jsontest.com/'</a>
 (% endblock %)
