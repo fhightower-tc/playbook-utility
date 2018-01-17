@@ -15,22 +15,22 @@
     <div class="columns large-6">
         <label>Name of playbook output variable:</label>
         <input id="name" type="text" v-model="name">
+        <button class="button secondary" v-on:click="addPath">Queue json path</button>
+
+        <br><br>
+
+        <ul>
+            <li v-for="path in jsonPaths">
+                {{ path.name }}: {{ path.path }}
+            </li>
+        </ul>
     </div>
     <div class="columns large-6">
         <label>Json path:</label>
         <input id="path" type="text" v-model="path">
-        <br><br>
     </div>
 
-    <ul>
-        <li v-for="path in jsonPaths">
-            {{ path.name }}: {{ path.path }}
-        </li>
-    </ul>
-
-    <br><br>
-    <button class="button secondary" v-on:click="addPath">Queue json path</button>
-    <br><br>
+    <div class="clearfix"></div>
 
     <form action="(( url_for('create_playbook') ))" method="post">
         <input type="input" name="jsonPaths" hidden="hidden" :value="JSON.stringify(jsonPaths)">

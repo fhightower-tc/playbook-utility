@@ -132,7 +132,7 @@ def create_playbook():
         "name" : "%s Requester Playbook",
         "panX" : 1392.0,
         "panY" : 20.0,
-        "logLevel" : "WARNING",
+        "logLevel" : "WARN",
         "description" : "Playbook that makes requests to %s and parses the json.",
         %s
         "playbookTriggerList" : [ ],

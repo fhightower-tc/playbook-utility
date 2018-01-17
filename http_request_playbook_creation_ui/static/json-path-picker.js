@@ -194,6 +194,7 @@
         var path = pathSegments.get().join('');
 
         jsonPathVue.path = path;
+        jsonPathVue.name = path;
         jsonPathVue.nameFocus();
 
         // $pathTarget.val(path);

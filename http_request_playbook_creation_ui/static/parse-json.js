@@ -33,10 +33,15 @@ var jsonPathVue = new Vue({
                 name: this.name
             });
             $.jGrowl('Path added!');
+            this.path = "";
+            this.name = "";
         },
         nameFocus: function() {
             /* Focus on the 'name' field. */
-            $('#name').focus();
+            // the timeout below is required so the value of the name field is filled in first and is then selected
+            window.setTimeout(function() {
+                $('#name').select();
+            }, 100)
         }
     }
 });
