@@ -1,5 +1,16 @@
 (% extends "layout.html" %)
 (% block content %)
+<div class="row">
+    (% with messages = get_flashed_messages(with_categories=true) %)
+      (% if messages %)
+        (% for category, message in messages %)
+          <span class="(( category ))">(( message ))</span>
+        (% endfor %)
+        <br><br>
+      (% endif %)
+    (% endwith %)
+</div>
+
 <form action="(( url_for('parse_json') ))">
     <input type="text" name="url" placeholder="Enter the url you would like to request...">
     <a href="(( url_for('parse_json', url='https://ioc-fang.github.io/datasets/fang.json') ))">Try 'https://ioc-fang.github.io/datasets/fang.json'</a>
