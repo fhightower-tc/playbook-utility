@@ -148,5 +148,61 @@ def create_playbook():
     return render_template("pb.html", partial_pb=rendered_partial_pb_template, full_pb=full_pb_template % (request.form['url'], request.form['url'], rendered_partial_pb_template))
 
 
+@app.route("/converter")
+def converter_index():
+    return render_template('converter_index.html')
+
+
+def _convert_to_component(playbook_dict):
+    """Convert the playbook to a component."""
+    playbook_dict['type'] = 'Pipe'
+
+    # todo: check if there is already an id of 53
+    new_trigger_id = 53
+
+    # replace all of the links to an from the trigger
+    original_trigger_id = playbook_dict['playbookTriggerList'][0]['id']
+    for link in playbook_dict['playbookConnectionList']:
+        # todo: test to see what a pb looks like if it loops back to the trigger
+    #     if link['targetJobId'] == original_trigger_id:
+    #         link['targetJobId'] = new_trigger_id
+        if link.get('sourceTriggerId') == original_trigger_id:
+            link['sourceTriggerId'] = new_trigger_id
+            print("replaced")
+
+    playbook_dict['playbookTriggerList'] = [{
+        "id" : new_trigger_id,
+        "name" : "Component Trigger",
+        "type" : "PipeConfig",
+        "eventType" : "Create",
+        "httpBasicAuthEnable" : False,
+        "anyOrg" : True,
+        "orFilters" : False,
+        "fireOnDuplicate" : False,
+        "renderBodyAsTip" : False,
+        "pipeInputParams" : "[{\"label\":\"b\",\"dataType\":\"String\",\"playbookDataType\":\"String\",\"required\":false,\"name\":\"a\",\"encrypted\":false,\"hidden\":false,\"hasDollarVariables\":false,\"playbookVariable\":false,\"validValuesList\":[\"${TEXT}\",\"${KEYCHAIN}\"]}]",
+        "pipeOutputParams" : "[{\"key\":\"c\",\"value\":\"d\",\"displayValue\":\"d\"}]"
+    }]
+    return playbook_dict
+
+
+@app.route("/converter/convert", methods=['POST'])
+def convert_pb():
+    playbook = request.form['playbookContent']
+
+    if playbook == '' or playbook == None:
+        flash('Please paste a playbook below to convert it to a component.', 'error')
+        return redirect(url_for('converter_index'))
+
+    # TODO: see if there is a better way to handle the escaped quotation marks other than the replacements below... if there is not, add some comments explaining them
+
+    playbook = playbook.replace('\\"', '=+=+=')
+    # print("replace {}".format())
+    playbook_dict = json.loads(playbook)
+    component = _convert_to_component(playbook_dict)
+
+    return render_template('convert.html', converted_playbook=json.dumps(component).replace('=+=+=', '\\"'))
+
+
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)

@@ -1,0 +1,21 @@
+(% extends "layout.html" %)
+(% block content %)
+
+<h2>Convert a Playbook to a Component</h2>
+
+<br><br>
+
+<div class="row">
+    (% with messages = get_flashed_messages(with_categories=true) %)
+      (% if messages %)
+        (% for category, message in messages %)
+          <span class="(( category ))">(( message ))</span>
+        (% endfor %)
+        <br><br>
+      (% endif %)
+    (% endwith %)
+</div>
+
+<div style="background-color: lightgrey;">(( converted_playbook ))</div>
+
+(% endblock %)
