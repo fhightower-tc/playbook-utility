@@ -1,1 +1,1 @@
-web: gunicorn http_request_playbook_creation_ui.http_request_playbook_creation_ui:app --log-file=-
+web: gunicorn playbook_utility.playbook_utility:app --log-file=-

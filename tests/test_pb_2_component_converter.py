@@ -4,14 +4,14 @@
 import unittest
 import html
 
-from http_request_playbook_creation_ui import http_request_playbook_creation_ui
+from playbook_utility import playbook_utility
 from .test_http_request_playbook_creation_ui import check_heading
 
 
 class HttpRequestPlaybookCreationUiTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.app = http_request_playbook_creation_ui.app.test_client()
+        self.app = playbook_utility.app.test_client()
 
     def test_converter_index(self):
         rv = self.app.get('/converter')

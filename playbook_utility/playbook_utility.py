@@ -26,7 +26,12 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/json")
+@app.route("/requester")
+def requester_index():
+    return render_template("requester_index.html")
+
+
+@app.route("/requester/json")
 def parse_json():
     if request.args.get('url'):
         r = requests.get(request.args['url'])
@@ -35,15 +40,15 @@ def parse_json():
             return render_template("json.html", responseData=r.text, url=request.args['url'])
         else:
             flash('Got a {} response code from {}. Please try another site or copy the json and paste it into the text area below.'.format(r.status_code, request.args['url']), 'error')
-            return redirect(url_for('index'))
+            return redirect(url_for('requester_index'))
     elif request.args.get('json'):
         return render_template("json.html", responseData=request.args['json'], url='N/A')
     else:
         flash('Please enter a URL or some json before continuing.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('requester_index'))
 
 
-@app.route("/pb", methods=['POST'])
+@app.route("/requester/pb", methods=['POST'])
 def create_playbook():
     partial_pb_template = """ "jobList": [{
     "id": 1,

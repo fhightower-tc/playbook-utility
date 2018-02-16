@@ -1,0 +1,11 @@
+(% extends "layout.html" %)
+(% block content %)
+
+<h2>Available resources:</h2>
+
+<ul>
+    <li><a href="(( url_for('requester_index') ))">HTTP Request Playbook Creator</a></li>
+    <li><a href="(( url_for('converter_index') ))">Convert a Playbook to a Component</a></li>
+</ul>
+
+(% endblock %)

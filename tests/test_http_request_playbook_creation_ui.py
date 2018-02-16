@@ -4,16 +4,16 @@
 import unittest
 import html
 
-from http_request_playbook_creation_ui import http_request_playbook_creation_ui
+from playbook_utility import playbook_utility
 
 
 def check_heading(response):
     """Make sure the heading is shown in a response."""
-    assert 'HTTP Request Playbook Creation UI' in response
-    assert 'UI for creating http request playbook.' in response
+    assert 'Playbook Utility' in response
+    assert 'Helpful tools for working with ThreatConnect playbooks.' in response
 
 
-def check_index(response):
+def check_requester_index(response):
     """Make sure the response contains everything that should be in the index."""
     check_heading(response)
     assert "Try 'https://ioc-fang.github.io/datasets/fang.json'" in response
@@ -22,14 +22,14 @@ def check_index(response):
 class HttpRequestPlaybookCreationUiTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.app = http_request_playbook_creation_ui.app.test_client()
+        self.app = playbook_utility.app.test_client()
 
     def test_get_index(self):
-        rv = self.app.get('/')
-        check_index(rv.data.decode())
+        rv = self.app.get('/requester')
+        check_requester_index(rv.data.decode())
 
     def test_json_parse(self):
-        rv = self.app.get('/json?url=https%3A%2F%2Fioc-fang.github.io%2Fdatasets%2Ffang.json')
+        rv = self.app.get('requester/json?url=https%3A%2F%2Fioc-fang.github.io%2Fdatasets%2Ffang.json')
         check_heading(rv.data.decode())
         assert '[.]' in rv.data.decode()
         assert 'xxxxx://' in rv.data.decode()
@@ -37,13 +37,13 @@ class HttpRequestPlaybookCreationUiTestCase(unittest.TestCase):
 
     def test_empty_json_parse(self):
         """Make sure an error message is shown if no content is given to the json path."""
-        rv = self.app.get('/json', follow_redirects=True)
-        check_index(rv.data.decode())
+        rv = self.app.get('requester/json', follow_redirects=True)
+        check_requester_index(rv.data.decode())
         assert "Please enter a URL or some json before continuing." in rv.data.decode()
 
     def test_blank_pb_creation(self):
         """Make sure that the blank playbook template created by this app is correct."""
-        rv = self.app.post('/pb', data={
+        rv = self.app.post('requester/pb', data={
             'jsonPaths': '[]',
             'url': ''
         })
