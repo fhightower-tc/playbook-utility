@@ -162,13 +162,12 @@ def _convert_to_component(playbook_dict):
     """Convert the playbook to a component."""
     playbook_dict['type'] = 'Pipe'
 
-    # todo: check if there is already an id of 53
-    new_trigger_id = 53
+    new_trigger_id = 1
 
     # replace all of the links to an from the trigger
     original_trigger_id = playbook_dict['playbookTriggerList'][0]['id']
     for link in playbook_dict['playbookConnectionList']:
-        if link['targetTriggerId'] == original_trigger_id:
+        if link.get('targetTriggerId') == original_trigger_id:
             link['targetTriggerId'] = new_trigger_id
         elif link.get('sourceTriggerId') == original_trigger_id:
             link['sourceTriggerId'] = new_trigger_id
@@ -197,8 +196,7 @@ def convert_pb():
         flash('Please paste a playbook below to convert it to a component.', 'error')
         return redirect(url_for('converter_index'))
 
-    # TODO: see if there is a better way to handle the escaped quotation marks other than the replacements below... if there is not, add some comments explaining them
-
+    # the replacements below are hacks to handle the the way quotation marks in playbooks are escaped
     playbook = playbook.replace('\\"', '=+=+=')
     try:
         playbook_dict = json.loads(playbook)
