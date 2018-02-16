@@ -163,12 +163,10 @@ def _convert_to_component(playbook_dict):
     # replace all of the links to an from the trigger
     original_trigger_id = playbook_dict['playbookTriggerList'][0]['id']
     for link in playbook_dict['playbookConnectionList']:
-        # todo: test to see what a pb looks like if it loops back to the trigger
-    #     if link['targetJobId'] == original_trigger_id:
-    #         link['targetJobId'] = new_trigger_id
-        if link.get('sourceTriggerId') == original_trigger_id:
+        if link['targetTriggerId'] == original_trigger_id:
+            link['targetTriggerId'] = new_trigger_id
+        elif link.get('sourceTriggerId') == original_trigger_id:
             link['sourceTriggerId'] = new_trigger_id
-            print("replaced")
 
     playbook_dict['playbookTriggerList'] = [{
         "id" : new_trigger_id,
@@ -197,7 +195,6 @@ def convert_pb():
     # TODO: see if there is a better way to handle the escaped quotation marks other than the replacements below... if there is not, add some comments explaining them
 
     playbook = playbook.replace('\\"', '=+=+=')
-    # print("replace {}".format())
     playbook_dict = json.loads(playbook)
     component = _convert_to_component(playbook_dict)
 
