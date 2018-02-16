@@ -200,10 +200,14 @@ def convert_pb():
     # TODO: see if there is a better way to handle the escaped quotation marks other than the replacements below... if there is not, add some comments explaining them
 
     playbook = playbook.replace('\\"', '=+=+=')
-    playbook_dict = json.loads(playbook)
-    component = _convert_to_component(playbook_dict)
-
-    return render_template('convert.html', converted_playbook=json.dumps(component).replace('=+=+=', '\\"'))
+    try:
+        playbook_dict = json.loads(playbook)
+    except json.decoder.JSONDecodeError as e:
+        flash('Error trying to parse the json for the playbook: {}'.format(e), 'error')
+        return redirect(url_for('converter_index'))
+    else:
+        component = _convert_to_component(playbook_dict)
+        return render_template('convert.html', converted_playbook=json.dumps(component).replace('=+=+=', '\\"'))
 
 
 if __name__ == '__main__':
