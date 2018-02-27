@@ -2,6 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import json
+import os
+try:
+    from StringIO import StringIO as ZipIO
+except:
+    from io import BytesIO as ZipIO
+import zipfile
+import tempfile
 
 from flask import flash, Flask, render_template, redirect, request, url_for
 import requests
@@ -19,6 +26,29 @@ class CustomFlask(Flask):
 
 app = CustomFlask(__name__)
 app.secret_key = 'abc'
+
+playbook_data = list()
+
+def _prepare_playbook_data():
+    """Create a data structure with all of the publicly available playbooks."""
+    with tempfile.TemporaryDirectory() as tmp_dir_name:
+        response = requests.get('https://github.com/ThreatConnect-Inc/threatconnect-playbooks/archive/master.zip')
+        with zipfile.ZipFile(ZipIO(response.content)) as pb_zip:
+            pb_zip.extractall(tmp_dir_name)
+            for path, dirs, files in os.walk(os.path.join(tmp_dir_name, 'threatconnect-playbooks-master/playbooks')):
+                this_pb_data = dict()
+                for file_ in files:
+                    if file_.lower() == 'readme.md':
+                        with open(os.path.join(path, file_)) as f:
+                            this_pb_data['readme'] = f.read()
+                    elif file_.lower().endswith('.pbx'):
+                        with open(os.path.join(path, file_)) as f:
+                            pb_json = json.load(f)
+                            this_pb_data['name'] = pb_json['name']
+                            this_pb_data['description'] = pb_json['description']
+
+                if this_pb_data != {}:
+                    playbook_data.append(this_pb_data)
 
 
 @app.route("/")
@@ -153,60 +183,18 @@ def create_playbook():
     return render_template("pb.html", partial_pb=rendered_partial_pb_template, full_pb=full_pb_template % (request.form['url'], request.form['url'], rendered_partial_pb_template))
 
 
-@app.route("/converter")
-def converter_index():
-    return render_template('converter_index.html')
+@app.route("/explore")
+def explorer_index():
+    return render_template("explorer_index.html", playbooks=playbook_data)
 
 
-def _convert_to_component(playbook_dict):
-    """Convert the playbook to a component."""
-    playbook_dict['type'] = 'Pipe'
-
-    new_trigger_id = 1
-
-    # replace all of the links to an from the trigger
-    original_trigger_id = playbook_dict['playbookTriggerList'][0]['id']
-    for link in playbook_dict['playbookConnectionList']:
-        if link.get('targetTriggerId') == original_trigger_id:
-            link['targetTriggerId'] = new_trigger_id
-        elif link.get('sourceTriggerId') == original_trigger_id:
-            link['sourceTriggerId'] = new_trigger_id
-
-    playbook_dict['playbookTriggerList'] = [{
-        "id" : new_trigger_id,
-        "name" : "Component Trigger",
-        "type" : "PipeConfig",
-        "eventType" : "Create",
-        "httpBasicAuthEnable" : False,
-        "anyOrg" : True,
-        "orFilters" : False,
-        "fireOnDuplicate" : False,
-        "renderBodyAsTip" : False,
-        "pipeInputParams" : "[{\"label\":\"b\",\"dataType\":\"String\",\"playbookDataType\":\"String\",\"required\":false,\"name\":\"a\",\"encrypted\":false,\"hidden\":false,\"hasDollarVariables\":false,\"playbookVariable\":false,\"validValuesList\":[\"${TEXT}\",\"${KEYCHAIN}\"]}]",
-        "pipeOutputParams" : "[{\"key\":\"c\",\"value\":\"d\",\"displayValue\":\"d\"}]"
-    }]
-    return playbook_dict
-
-
-@app.route("/converter/convert", methods=['POST'])
-def convert_pb():
-    playbook = request.form['playbookContent']
-
-    if playbook == '' or playbook == None:
-        flash('Please paste a playbook below to convert it to a component.', 'error')
-        return redirect(url_for('converter_index'))
-
-    # the replacements below are hacks to handle the the way quotation marks in playbooks are escaped
-    playbook = playbook.replace('\\"', '=+=+=')
-    try:
-        playbook_dict = json.loads(playbook)
-    except json.decoder.JSONDecodeError as e:
-        flash('Error trying to parse the json for the playbook: {}'.format(e), 'error')
-        return redirect(url_for('converter_index'))
-    else:
-        component = _convert_to_component(playbook_dict)
-        return render_template('convert.html', converted_playbook=json.dumps(component).replace('=+=+=', '\\"'))
+@app.route('/explore/<desired_playbook>')
+def playbook_details(desired_playbook):
+    for playbook in playbook_data:
+        if playbook['name'] == desired_playbook:
+            return render_template("playbook_details.html", playbook_details=playbook)
 
 
 if __name__ == '__main__':
+    _prepare_playbook_data()
     app.run(debug=True, use_reloader=True)

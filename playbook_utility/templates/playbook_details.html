@@ -1,0 +1,18 @@
+(% extends "layout.html" %)
+(% block content %)
+    <h1>(( playbook_details.name ))</h1>
+    (( playbook_details.description ))
+    (% if playbook_details.dependencies %)
+        <h2>Dependencies</h2>
+        (( playbook_details.dependencies ))
+    (% endif %)
+
+    (% if playbook_details.images %)
+        <h2>Images</h2>
+        (% for image in playbook_details.images %)
+            <img src="(( image ))">
+        (% endfor %)
+    (% endif %)
+
+    <button class="button">Download</button>
+(% endblock %)

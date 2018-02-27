@@ -17,7 +17,7 @@ def check_index(response):
     """Make sure the response contains everything that should be in the index."""
     check_heading(response)
     assert "HTTP Request Playbook Creator" in response
-    assert "Convert a Playbook to a Component" in response
+    assert "Explore Publicly Available Playbooks" in response
 
 
 class IndexTestCase(unittest.TestCase):
