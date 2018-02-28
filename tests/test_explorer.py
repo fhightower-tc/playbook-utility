@@ -32,14 +32,19 @@ class ExplorerTestCase(unittest.TestCase):
         self.app = playbook_utility.app.test_client()
 
     def test_get_index(self):
-        rv = self.app.get('/')
+        rv = self.app.get('/explore')
         check_index(rv.data.decode())
 
     def test_detail_page_view(self):
         """Make sure the page for each playbook is working properly."""
+        playbook_utility._prepare_playbook_data()
         rv = self.app.get('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)')
-        assert rv.status_code == 200
-        assert 'Download' in rv.data.decode()
+        assert 'Download playbook' in rv.data.decode()
         check_pb_name_and_details(rv.data.decode())
+
+    def test_nonexist_page(self):
+        """Make sure the page for each playbook is working properly."""
+        rv = self.app.get('/explore/foobar', follow_redirects=True)
+        assert 'There is no playbook with the name foobar. Click on one of the playbooks below to explore it.' in rv.data.decode()
 
     # TODO: Add tests to make sure images are properly shown

@@ -8,4 +8,4 @@ run:
 	~/.virtualenvs/playbook-utility/bin/python playbook_utility/playbook_utility.py
 
 test:
-	~/.virtualenvs/playbook-utility/bin/python -m unittest
+	~/.virtualenvs/playbook-utility/bin/python -m pytest
