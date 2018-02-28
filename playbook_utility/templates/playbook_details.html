@@ -2,10 +2,10 @@
 (% block content %)
     <h2>(( playbook_details.name ))</h2>
     (( playbook_details.description ))
-    (% if playbook_details.dependencies %)
-        <h3>Dependencies</h3>
-        (( playbook_details.dependencies ))
-    (% endif %)
+    <!-- (% if playbook_details.readme %)
+        <h3>Readme</h3>
+        (( playbook_details.readme ))
+    (% endif %) -->
 
     (% if playbook_details.images %)
         <h3>Images</h3>

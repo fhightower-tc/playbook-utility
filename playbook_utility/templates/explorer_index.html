@@ -3,11 +3,10 @@
     <h2>Explore Playbooks</h2>
     The playbooks listed below are from <a href="https://github.com/ThreatConnect-Inc/threatconnect-playbooks">https://github.com/ThreatConnect-Inc/threatconnect-playbooks</a>.
 
-    <br><br>
-
     <div class="row">
         (% with messages = get_flashed_messages(with_categories=true) %)
           (% if messages %)
+            <br><br>
             (% for category, message in messages %)
               <span class="(( category ))">(( message ))</span>
             (% endfor %)

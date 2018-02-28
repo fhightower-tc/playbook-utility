@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import datetime
 import json
 import os
 try:
@@ -29,10 +30,12 @@ app.secret_key = 'abc'
 
 playbook_data = list()
 
-def _prepare_playbook_data():
-    """Create a data structure with all of the publicly available playbooks."""
+
+def _update_pbs():
+    """Update the list of publicly available playbooks."""
+    playbook_data = list()
     with tempfile.TemporaryDirectory() as tmp_dir_name:
-        response = requests.get('https://github.com/fhightower/threatconnect-playbooks/archive/master.zip')
+        response = requests.get('https://github.com/ThreatConnect-Inc/threatconnect-playbooks/archive/master.zip')
         with zipfile.ZipFile(ZipIO(response.content)) as pb_zip:
             pb_zip.extractall(tmp_dir_name)
             # find the base pb path as well as all of the playbook directories
@@ -54,6 +57,12 @@ def _prepare_playbook_data():
                                 pb_json = json.load(f)
                                 this_pb_data['name'] = pb_json['name']
                                 this_pb_data['description'] = pb_json['description']
+                                this_pb_data['pb_file_name'] = file_
+                                this_pb_data['raw_json'] = json.dumps(pb_json, indent=4)
+                                this_pb_data['last_updated'] = str(datetime.date.today())
+
+                            with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/pbs/{}".format(file_))), 'w') as f:
+                                f.write(json.dumps(pb_json, indent=4))
 
                     # if there is an `images` directory in the playbook's directory, pull out all of those images
                     if 'images' in dirs:
@@ -74,6 +83,26 @@ def _prepare_playbook_data():
 
                 if this_pb_data != {}:
                     playbook_data.append(this_pb_data)
+
+    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./pbs.json")), 'w+') as f:
+        json.dump(playbook_data, f)
+
+    return playbook_data
+
+
+def _prepare_playbook_data():
+    """Create a data structure with all of the publicly available playbooks."""
+    try:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./pbs.json"))) as f:
+            existing_pb_data = json.load(f)
+    except FileNotFoundError:
+        return _update_pbs()
+    else:
+        # check the last updated date of the first entry
+        if existing_pb_data[0]['last_updated'] == str(datetime.date.today()):
+            return existing_pb_data
+        else:
+            return _update_pbs()
 
 
 @app.route("/")
@@ -220,9 +249,9 @@ def playbook_details(desired_playbook):
             return render_template("playbook_details.html", playbook_details=playbook)
 
     flash('There is no playbook with the name {}. Click on one of the playbooks below to explore it.'.format(desired_playbook), 'error')
-    return redirect(url_for('index'))
+    return redirect(url_for('explorer_index'))
 
 
 if __name__ == '__main__':
-    _prepare_playbook_data()
+    playbook_data = _prepare_playbook_data()
     app.run(debug=True, use_reloader=True)
