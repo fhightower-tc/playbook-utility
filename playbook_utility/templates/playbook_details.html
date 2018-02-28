@@ -1,18 +1,37 @@
 (% extends "layout.html" %)
 (% block content %)
-    <h1>(( playbook_details.name ))</h1>
+    <h2>(( playbook_details.name ))</h2>
     (( playbook_details.description ))
     (% if playbook_details.dependencies %)
-        <h2>Dependencies</h2>
+        <h3>Dependencies</h3>
         (( playbook_details.dependencies ))
     (% endif %)
 
     (% if playbook_details.images %)
-        <h2>Images</h2>
+        <h3>Images</h3>
         (% for image in playbook_details.images %)
             <img src="(( url_for('static', filename='pb_images/' + image) ))">
         (% endfor %)
     (% endif %)
 
-    <button class="button">Download</button>
+    <br><br>
+
+    <a class="button secondary" href="(( url_for('static', filename='pbs/' + playbook_details.pb_file_name) ))" download>Download playbook</a>
+
+    <br><br><br><br><br>
+
+    <ul class="vertical menu" data-accordion-menu>
+      <li>
+        <a href="#">View Playbook File</a>
+        <ul style="background-color: lightgrey;">
+            (( playbook_details.raw_json|safe ))
+        </ul>
+      </li>
+    </ul>
+
+    <br><br>
+
+    <script type="text/javascript">
+        $(document).foundation();
+    </script>
 (% endblock %)
