@@ -10,7 +10,7 @@
     (% if playbook_details.images %)
         <h2>Images</h2>
         (% for image in playbook_details.images %)
-            <img src="(( image ))">
+            <img src="(( url_for('static', filename='pb_images/' + image) ))">
         (% endfor %)
     (% endif %)
 

@@ -32,20 +32,45 @@ playbook_data = list()
 def _prepare_playbook_data():
     """Create a data structure with all of the publicly available playbooks."""
     with tempfile.TemporaryDirectory() as tmp_dir_name:
-        response = requests.get('https://github.com/ThreatConnect-Inc/threatconnect-playbooks/archive/master.zip')
+        response = requests.get('https://github.com/fhightower/threatconnect-playbooks/archive/master.zip')
         with zipfile.ZipFile(ZipIO(response.content)) as pb_zip:
             pb_zip.extractall(tmp_dir_name)
+            # find the base pb path as well as all of the playbook directories
             for path, dirs, files in os.walk(os.path.join(tmp_dir_name, 'threatconnect-playbooks-master/playbooks')):
-                this_pb_data = dict()
-                for file_ in files:
-                    if file_.lower() == 'readme.md':
-                        with open(os.path.join(path, file_)) as f:
-                            this_pb_data['readme'] = f.read()
-                    elif file_.lower().endswith('.pbx'):
-                        with open(os.path.join(path, file_)) as f:
-                            pb_json = json.load(f)
-                            this_pb_data['name'] = pb_json['name']
-                            this_pb_data['description'] = pb_json['description']
+                pb_base_path = path
+                pb_dirs = dirs
+                break
+
+            # handle each playbook
+            for pb_dir in pb_dirs:
+                for path, dirs, files in os.walk(os.path.join(pb_base_path, pb_dir)):
+                    this_pb_data = dict()
+                    for file_ in files:
+                        if file_.lower() == 'readme.md':
+                            with open(os.path.join(path, file_)) as f:
+                                this_pb_data['readme'] = f.read()
+                        elif file_.lower().endswith('.pbx'):
+                            with open(os.path.join(path, file_)) as f:
+                                pb_json = json.load(f)
+                                this_pb_data['name'] = pb_json['name']
+                                this_pb_data['description'] = pb_json['description']
+
+                    # if there is an `images` directory in the playbook's directory, pull out all of those images
+                    if 'images' in dirs:
+                        for path, dirs, files in os.walk(os.path.join(pb_base_path, pb_dir, 'images')):
+                            for file_ in files:
+                                if file_.lower().endswith('.jpg') or file_.lower().endswith('.png'):
+                                    if not this_pb_data.get('images'):
+                                        this_pb_data['images'] = list()
+                                    image_file_text = str()
+                                    with open(os.path.join(path, file_), 'rb') as f:
+                                        image_file_text = f.read()
+
+                                    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/pb_images/{}".format(file_))), 'wb') as f:
+                                        f.write(image_file_text)
+
+                                    this_pb_data['images'].append(file_)
+                    break
 
                 if this_pb_data != {}:
                     playbook_data.append(this_pb_data)
@@ -193,6 +218,9 @@ def playbook_details(desired_playbook):
     for playbook in playbook_data:
         if playbook['name'] == desired_playbook:
             return render_template("playbook_details.html", playbook_details=playbook)
+
+    flash('There is no playbook with the name {}. Click on one of the playbooks below to explore it.'.format(desired_playbook), 'error')
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
