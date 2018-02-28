@@ -252,6 +252,8 @@ def playbook_details(desired_playbook):
     return redirect(url_for('explorer_index'))
 
 
+# this needs to be put here so that the app will run properly in heroku
+playbook_data = _prepare_playbook_data()
+
 if __name__ == '__main__':
-    playbook_data = _prepare_playbook_data()
     app.run(debug=True, use_reloader=True)
