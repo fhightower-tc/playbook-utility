@@ -43,7 +43,7 @@ def _read_data(tmp_dir_name, object_type):
     for object_dir in object_dirs:
         for path, dirs, files in os.walk(os.path.join(object_base_path, object_dir)):
             this_object_data = dict()
-            if object_type == 'playbooks':
+            if object_type == 'playbooks' or object_type == 'components':
                 for file_ in files:
                     if file_.lower() == 'readme.md':
                         with open(os.path.join(path, file_)) as f:
@@ -57,7 +57,7 @@ def _read_data(tmp_dir_name, object_type):
                             this_object_data['raw_json'] = json.dumps(pb_json, indent=4)
                             this_object_data['last_updated'] = str(datetime.date.today())
 
-                        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/pbs/{}".format(file_))), 'w') as f:
+                        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}/{}".format(object_type, file_))), 'w') as f:
                             f.write(json.dumps(pb_json, indent=4))
 
                 # if there is an `images` directory in the playbook's directory, pull out all of those images
@@ -71,7 +71,35 @@ def _read_data(tmp_dir_name, object_type):
                                 with open(os.path.join(path, file_), 'rb') as f:
                                     image_file_text = f.read()
 
-                                with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/pb_images/{}".format(file_))), 'wb') as f:
+                                with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}_images/{}".format(object_type, file_))), 'wb') as f:
+                                    f.write(image_file_text)
+
+                                this_object_data['images'].append(file_)
+            elif object_type == 'apps':
+                for file_ in files:
+                    if file_.lower() == 'readme.md':
+                        with open(os.path.join(path, file_)) as f:
+                            this_object_data['readme'] = f.read()
+                    elif file_.lower() == 'install.json':
+                        with open(os.path.join(path, file_)) as f:
+                            install_json = json.load(f)
+                            if install_json.get('note'):
+                                this_object_data['description'] = install_json['note']
+                            this_object_data['name'] = install_json['displayName']
+                            this_object_data['last_updated'] = str(datetime.date.today())
+
+                # if there is an `images` directory in the playbook's directory, pull out all of those images
+                if 'images' in dirs:
+                    for path, dirs, files in os.walk(os.path.join(object_base_path, object_dir, 'images')):
+                        for file_ in files:
+                            if file_.lower().endswith('.jpg') or file_.lower().endswith('.png'):
+                                if not this_object_data.get('images'):
+                                    this_object_data['images'] = list()
+                                image_file_text = str()
+                                with open(os.path.join(path, file_), 'rb') as f:
+                                    image_file_text = f.read()
+
+                                with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}_images/{}".format(object_type, file_))), 'wb') as f:
                                     f.write(image_file_text)
 
                                 this_object_data['images'].append(file_)
@@ -100,7 +128,7 @@ def _update_data():
     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./components.json")), 'w+') as f:
         json.dump(component_data, f)
 
-    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./playbook_apps.json")), 'w+') as f:
+    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json")), 'w+') as f:
         json.dump(app_data, f)
 
     return playbook_data, component_data, app_data
@@ -115,7 +143,7 @@ def _prepare_data():
         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./components.json"))) as f:
             existing_component_data = json.load(f)
 
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./playbook_apps.json"))) as f:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json"))) as f:
             existing_pb_app_data = json.load(f)
     except FileNotFoundError:
         return _update_data()
@@ -264,13 +292,22 @@ def explorer_index():
     return render_template("explorer_index.html", playbooks=playbook_data, components=component_data, apps=app_data)
 
 
-@app.route('/explore/<desired_playbook>')
-def playbook_details(desired_playbook):
+@app.route('/explore/<desired_object>')
+def explore_details(desired_object):
+    # TODO: there is probably a better way to determine whether the object is a playbook, component, or playbook app
     for playbook in playbook_data:
-        if playbook['name'] == desired_playbook:
-            return render_template("playbook_details.html", playbook_details=playbook)
+        if playbook['name'] == desired_object:
+            return render_template('explore_details.html', details=playbook)
 
-    flash('There is no playbook with the name {}. Click on one of the playbooks below to explore it.'.format(desired_playbook), 'error')
+    for component in component_data:
+        if component['name'] == desired_object:
+            return render_template('explore_details.html', details=component)
+
+    for app in app_data:
+        if app['name'] == desired_object:
+            return render_template('explore_details.html', details=app, image_dir='apps_images')
+
+    flash('There is no playbook, component, or app with the name {}. Click on one of the playbooks below to explore it.'.format(desired_object), 'error')
     return redirect(url_for('explorer_index'))
 
 

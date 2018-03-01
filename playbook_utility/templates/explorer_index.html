@@ -1,7 +1,7 @@
 (% extends "layout.html" %)
 (% block content %)
-    <h2>Explore Playbooks, Components, and Playbook Apps</h2>
-    The resources listed below are from <a href="https://github.com/ThreatConnect-Inc/threatconnect-playbooks">https://github.com/ThreatConnect-Inc/threatconnect-playbooks</a>.
+    <h2><b>Playbooks, Components, and Apps</b></h2>
+    The resources listed below are from <a href="https://github.com/ThreatConnect-Inc/threatconnect-playbooks">https://github.com/ThreatConnect-Inc/threatconnect-playbooks</a>. Feel free to use them!
 
     <div class="row">
         (% with messages = get_flashed_messages(with_categories=true) %)
@@ -17,7 +17,7 @@
 
 
     <br><br>
-    <h4 id="playbooks">Playbooks</h4>
+    <h4 id="playbooks"><b>Playbooks</b></h4>
     <ul>
     (% for playbook in playbooks %)
         <li><a href="/explore/(( playbook.name ))">(( playbook.name ))</a> - (( playbook.description|safe ))</li>
@@ -25,7 +25,7 @@
     </ul>
 
     <br><br>
-    <h4 id="components">Components</h4>
+    <h4 id="components"><b>Components</b></h4>
     <ul>
     (% for component in components %)
         <li><a href="/explore/(( component.name ))">(( component.name ))</a> - (( component.description|safe ))</li>
@@ -33,7 +33,7 @@
     </ul>
 
     <br><br>
-    <h4 id="playbookApps">Playbook Apps</h4>
+    <h4 id="playbookApps"><b>Playbook Apps</b></h4>
     <ul>
     (% for app in apps %)
         <li><a href="/explore/(( app.name ))">(( app.name ))</a> - (( app.description|safe ))</li>

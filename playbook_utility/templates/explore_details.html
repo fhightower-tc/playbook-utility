@@ -1,0 +1,41 @@
+(% extends "layout.html" %)
+(% block content %)
+    <h2>(( details.name ))</h2>
+    (( details.description ))
+    <!-- (% if details.readme %)
+        <h3>Readme</h3>
+        (( details.readme ))
+    (% endif %) -->
+
+    (% if details.images %)
+        <h3>Images</h3>
+        (% for image in details.images %)
+            <img src="(( url_for('static', filename=(( image_dir )) + '/' + image) ))"><br>
+        (% endfor %)
+    (% endif %)
+
+    <br><br>
+
+    (% if details.pb_file_name %)
+        <a class="button secondary" href="(( url_for('static', filename='pbs/' + details.pb_file_name) ))" download>Download playbook</a>
+    (% endif %)
+
+    <br><br><br><br><br>
+
+    (% if details.raw_json %)
+        <ul class="vertical menu" data-accordion-menu>
+          <li>
+            <a href="#">View Playbook File</a>
+            <ul style="background-color: lightgrey;">
+                (( details.raw_json|safe ))
+            </ul>
+          </li>
+        </ul>
+    (% endif %)
+
+    <br><br>
+
+    <script type="text/javascript">
+        $(document).foundation();
+    </script>
+(% endblock %)
