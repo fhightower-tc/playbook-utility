@@ -24,6 +24,9 @@ def check_index(response):
     """Make sure the response contains everything that should be in the index."""
     check_heading(response)
     check_pb_name_and_details(response)
+    assert 'Playbooks' in response
+    assert 'Components' in response
+    assert 'Playbook Apps' in response
 
 
 class ExplorerTestCase(unittest.TestCase):
@@ -37,7 +40,6 @@ class ExplorerTestCase(unittest.TestCase):
 
     def test_detail_page_view(self):
         """Make sure the page for each playbook is working properly."""
-        playbook_utility._prepare_playbook_data()
         rv = self.app.get('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)')
         assert 'Download playbook' in rv.data.decode()
         check_pb_name_and_details(rv.data.decode())
