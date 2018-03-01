@@ -13,20 +13,30 @@ def check_heading(response):
     assert 'Helpful tools for working with ThreatConnect playbooks.' in response
 
 
-def check_pb_name_and_details(response):
-    """Make sure the response contains everything that should be in the index."""
-    check_heading(response)
+def check_pb_name_and_description(response):
     assert 'Palo Alto Wildfire Malware Triage (File)' in response
     assert 'users detonate a file in Palo Alto Wildfire' in response
+
+
+def check_component_name_and_description(response):
+    # TODO: implement
+    assert '' in response
+
+
+def check_app_name_and_description(response):
+    assert 'JSON Builder' in response
+    assert 'Take data of multiple types and output a JSON String.' in response
 
 
 def check_index(response):
     """Make sure the response contains everything that should be in the index."""
     check_heading(response)
-    check_pb_name_and_details(response)
     assert 'Playbooks' in response
     assert 'Components' in response
     assert 'Playbook Apps' in response
+    check_pb_name_and_description(response)
+    check_component_name_and_description(response)
+    check_app_name_and_description(response)
 
 
 class ExplorerTestCase(unittest.TestCase):
@@ -42,11 +52,11 @@ class ExplorerTestCase(unittest.TestCase):
         """Make sure the page for each playbook is working properly."""
         rv = self.app.get('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)')
         assert 'Download playbook' in rv.data.decode()
-        check_pb_name_and_details(rv.data.decode())
+        check_pb_name_and_description(rv.data.decode())
 
     def test_nonexist_page(self):
         """Make sure the page for each playbook is working properly."""
         rv = self.app.get('/explore/foobar', follow_redirects=True)
-        assert 'There is no playbook with the name foobar. Click on one of the playbooks below to explore it.' in rv.data.decode()
+        assert 'There is no playbook, component, or app with the name foobar. Click on one of the playbooks below to explore it.' in rv.data.decode()
 
     # TODO: Add tests to make sure images are properly shown

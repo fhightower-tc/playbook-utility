@@ -30,7 +30,7 @@ app.secret_key = 'abc'
 
 
 def _read_data(tmp_dir_name, object_type):
-    """."""
+    # TODO: A lot of the code in this function can be consolidated... I haven't taken the time to do this yet, but it needs to be done eventually
     object_data = list()
 
     # find the base pb path as well as all of the playbook directories
