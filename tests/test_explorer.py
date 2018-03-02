@@ -59,4 +59,25 @@ class ExplorerTestCase(unittest.TestCase):
         rv = self.app.get('/explore/foobar', follow_redirects=True)
         assert 'There is no playbook, component, or app with the name foobar. Click on one of the playbooks below to explore it.' in rv.data.decode()
 
+    def test_votes(self):
+        rv = self.app.post('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)/vote')
+        assert '/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20%28File%29' in rv.location
+
+    def test_votes_db(self):
+        # get the initial vote count
+        voted_object = playbook_utility.PbObject.query.filter_by(name='Palo Alto Wildfire Malware Triage (File)').first()
+        initial_votes = voted_object.votes
+
+        # vote for the playbook
+        rv = self.app.post('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)/vote')
+
+        # get the object again (yes, this is necesary) and check the vote count
+        voted_object = playbook_utility.PbObject.query.filter_by(name='Palo Alto Wildfire Malware Triage (File)').first()
+        assert voted_object.votes == initial_votes + 1
+
+    def test_votes_redirect(self):
+        rv = self.app.post('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)/vote', follow_redirects=True)
+        assert 'Download playbook' in rv.data.decode()
+        check_pb_name_and_description(rv.data.decode())
+
     # TODO: Add tests to make sure images are properly shown

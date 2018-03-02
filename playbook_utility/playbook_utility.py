@@ -12,6 +12,7 @@ import zipfile
 import tempfile
 
 from flask import flash, Flask, render_template, redirect, request, url_for
+from flask_sqlalchemy import SQLAlchemy
 import requests
 
 class CustomFlask(Flask):
@@ -26,7 +27,15 @@ class CustomFlask(Flask):
     ))
 
 app = CustomFlask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./test.db'
+db = SQLAlchemy(app)
 app.secret_key = 'abc'
+
+
+class PbObject(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), unique=True, nullable=False)
+    votes = db.Column(db.Integer(), nullable=False)
 
 
 def _read_data(tmp_dir_name, object_type):
@@ -144,13 +153,13 @@ def _prepare_data():
             existing_component_data = json.load(f)
 
         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json"))) as f:
-            existing_pb_app_data = json.load(f)
+            existing_app_data = json.load(f)
     except FileNotFoundError:
         return _update_data()
     else:
         # check the last updated date of the first entry
         if existing_pb_data[0]['last_updated'] == str(datetime.date.today()):
-            return existing_pb_data, existing_component_data, existing_pb_app_data
+            return existing_pb_data, existing_component_data, existing_app_data
         else:
             return _update_data()
 
@@ -287,6 +296,21 @@ def create_playbook():
     return render_template("pb.html", partial_pb=rendered_partial_pb_template, full_pb=full_pb_template % (request.form['url'], request.form['url'], rendered_partial_pb_template))
 
 
+@app.route('/explore/<desired_object>/vote', methods=['POST'])
+def record_vote(desired_object):
+    this_object = PbObject.query.filter_by(name=desired_object).first()
+    if this_object:
+        new_vote_count = this_object.votes + 1
+        db.session.delete(this_object)
+        db.session.commit()
+    else:
+        new_vote_count = 1
+    new_object = PbObject(name=desired_object, votes=new_vote_count)
+    db.session.add(new_object)
+    db.session.commit()
+    return redirect(url_for('explore_details', desired_object=desired_object))
+
+
 @app.route("/explore")
 def explorer_index():
     return render_template("explorer_index.html", playbooks=playbook_data, components=component_data, apps=app_data)
@@ -294,18 +318,25 @@ def explorer_index():
 
 @app.route('/explore/<desired_object>')
 def explore_details(desired_object):
+    # get the votes for the given object
+    this_object = PbObject.query.filter_by(name=desired_object).first()
+    if this_object:
+        votes = this_object.votes
+    else:
+        votes = 0
+
     # TODO: there is probably a better way to determine whether the object is a playbook, component, or playbook app
     for playbook in playbook_data:
         if playbook['name'] == desired_object:
-            return render_template('explore_details.html', details=playbook)
+            return render_template('explore_details.html', details=playbook, votes=votes)
 
     for component in component_data:
         if component['name'] == desired_object:
-            return render_template('explore_details.html', details=component)
+            return render_template('explore_details.html', details=component, votes=votes)
 
     for app in app_data:
         if app['name'] == desired_object:
-            return render_template('explore_details.html', details=app, image_dir='apps_images')
+            return render_template('explore_details.html', details=app, votes=votes, image_dir='apps_images')
 
     flash('There is no playbook, component, or app with the name {}. Click on one of the playbooks below to explore it.'.format(desired_object), 'error')
     return redirect(url_for('explorer_index'))
@@ -313,6 +344,7 @@ def explore_details(desired_object):
 
 # this needs to be put here so that the app will run properly in heroku
 playbook_data, component_data, app_data = _prepare_data()
+db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)

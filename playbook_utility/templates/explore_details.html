@@ -1,6 +1,10 @@
+<title>(( details.name ))</title>
+
 (% extends "layout.html" %)
 (% block content %)
-    <h2>(( details.name ))</h2>
+    <h2>(( details.name ))</h2><form action="(( url_for('record_vote', desired_object=details.name) ))" method="POST">
+        <button class="button secondary submit"><i class="fas fa-star"></i> (( votes ))</button>
+    </form>
     (( details.description ))
     <!-- (% if details.readme %)
         <h3>Readme</h3>
