@@ -27,7 +27,7 @@ class CustomFlask(Flask):
     ))
 
 app = CustomFlask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./playbooks.db'
 db = SQLAlchemy(app)
 app.secret_key = 'abc'
 
@@ -344,7 +344,7 @@ def explore_details(desired_object):
 
 # this needs to be put here so that the app will run properly in heroku
 playbook_data, component_data, app_data = _prepare_data()
-db.create_all()
+# db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)
