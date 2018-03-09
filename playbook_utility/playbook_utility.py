@@ -13,6 +13,7 @@ import tempfile
 
 from flask import flash, Flask, render_template, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import OperationalError
 import requests
 
 class CustomFlask(Flask):
@@ -296,6 +297,11 @@ def create_playbook():
     return render_template("pb.html", partial_pb=rendered_partial_pb_template, full_pb=full_pb_template % (request.form['url'], request.form['url'], rendered_partial_pb_template))
 
 
+@app.route("/explore")
+def explorer_index():
+    return render_template("explorer_index.html", playbooks=playbook_data, components=component_data, apps=app_data)
+
+
 @app.route('/explore/<desired_object>/vote', methods=['POST'])
 def record_vote(desired_object):
     this_object = PbObject.query.filter_by(name=desired_object).first()
@@ -311,18 +317,17 @@ def record_vote(desired_object):
     return redirect(url_for('explore_details', desired_object=desired_object))
 
 
-@app.route("/explore")
-def explorer_index():
-    return render_template("explorer_index.html", playbooks=playbook_data, components=component_data, apps=app_data)
-
-
 @app.route('/explore/<desired_object>')
 def explore_details(desired_object):
-    # get the votes for the given object
-    this_object = PbObject.query.filter_by(name=desired_object).first()
-    if this_object:
-        votes = this_object.votes
-    else:
+    try:
+        # get the votes for the given object
+        this_object = PbObject.query.filter_by(name=desired_object).first()
+        if this_object:
+            votes = this_object.votes
+        else:
+            votes = 0
+    except OperationalError as e:
+        db.create_all()
         votes = 0
 
     # TODO: there is probably a better way to determine whether the object is a playbook, component, or playbook app
@@ -344,7 +349,6 @@ def explore_details(desired_object):
 
 # this needs to be put here so that the app will run properly in heroku
 playbook_data, component_data, app_data = _prepare_data()
-# db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)
