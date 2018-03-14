@@ -333,11 +333,11 @@ def explore_details(desired_object):
     # TODO: there is probably a better way to determine whether the object is a playbook, component, or playbook app
     for playbook in playbook_data:
         if playbook['name'] == desired_object:
-            return render_template('explore_details.html', details=playbook, votes=votes)
+            return render_template('explore_details.html', details=playbook, votes=votes, image_dir='playbooks_images')
 
     for component in component_data:
         if component['name'] == desired_object:
-            return render_template('explore_details.html', details=component, votes=votes)
+            return render_template('explore_details.html', details=component, votes=votes, image_dir='components_images')
 
     for app in app_data:
         if app['name'] == desired_object:
