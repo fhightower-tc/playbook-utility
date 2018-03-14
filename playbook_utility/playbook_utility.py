@@ -327,6 +327,7 @@ def explore_details(desired_object):
         else:
             votes = 0
     except OperationalError as e:
+        print("OperationalError: recreating db")
         db.create_all()
         votes = 0
 
