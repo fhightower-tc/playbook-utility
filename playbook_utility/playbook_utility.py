@@ -97,6 +97,16 @@ def _read_data(tmp_dir_name, object_type):
                                 this_object_data['description'] = install_json['note']
                             this_object_data['name'] = install_json['displayName']
                             this_object_data['last_updated'] = str(datetime.date.today())
+                    # this handles apps packaged from http://tcex.hightower.space/
+                    elif file_.lower() == '.bumpversion.cfg':
+                        # todo: add a check to make sure there is only one directory found here
+                        app_dir = [dir_ for dir_ in dirs if not dir_.startswith('test')][0]
+                        with open(os.path.join(path, app_dir, 'install.json')) as f:
+                            install_json = json.load(f)
+                            if install_json.get('note'):
+                                this_object_data['description'] = install_json['note']
+                            this_object_data['name'] = install_json['displayName']
+                            this_object_data['last_updated'] = str(datetime.date.today())
 
                 # if there is an `images` directory in the playbook's directory, pull out all of those images
                 if 'images' in dirs:
