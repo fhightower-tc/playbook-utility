@@ -64,16 +64,12 @@ class ExplorerTestCase(unittest.TestCase):
         assert '/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20%28File%29' in rv.location
 
     def test_votes_db(self):
-        # get the initial vote count
-        voted_object = playbook_utility.PbObject.query.filter_by(name='Palo Alto Wildfire Malware Triage (File)').first()
-        initial_votes = voted_object.votes
-
         # vote for the playbook
-        rv = self.app.post('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)/vote')
-
-        # get the object again (yes, this is necesary) and check the vote count
-        voted_object = playbook_utility.PbObject.query.filter_by(name='Palo Alto Wildfire Malware Triage (File)').first()
-        assert voted_object.votes == initial_votes + 1
+        original_vote_count = playbook_utility.get_votes('Palo Alto Wildfire Malware Triage (File)')
+        rv = self.app.post('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)/vote', follow_redirects=True)
+        print("response {}".format(rv.data.decode()))
+        print("count {}".format(playbook_utility.get_votes('Palo Alto Wildfire Malware Triage (File)') + 1))
+        assert '<i class="fas fa-star"></i> {}'.format(original_vote_count + 1) in rv.data.decode()
 
     def test_votes_redirect(self):
         rv = self.app.post('/explore/Palo%20Alto%20Wildfire%20Malware%20Triage%20(File)/vote', follow_redirects=True)

@@ -12,8 +12,6 @@ import zipfile
 import tempfile
 
 from flask import flash, Flask, render_template, redirect, request, url_for
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import OperationalError
 import requests
 
 class CustomFlask(Flask):
@@ -28,15 +26,7 @@ class CustomFlask(Flask):
     ))
 
 app = CustomFlask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./playbooks.db'
-db = SQLAlchemy(app)
 app.secret_key = 'abc'
-
-
-class PbObject(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), unique=True, nullable=False)
-    votes = db.Column(db.Integer(), nullable=False)
 
 
 def _read_data(tmp_dir_name, object_type):
@@ -312,34 +302,44 @@ def explorer_index():
     return render_template("explorer_index.html", playbooks=playbook_data, components=component_data, apps=app_data)
 
 
+def get_votes_json():
+    """Read and return the votes.json file."""
+    try:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./votes.json")), 'r') as f:
+            votes_dict = json.load(f)
+    except FileNotFoundError:
+        votes_dict = dict()
+    return votes_dict
+
+
+def update_votes(new_votes_dict):
+    """Update the votes data."""
+    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./votes.json")), 'w+') as f:
+        json.dump(new_votes_dict, f)
+
+
 @app.route('/explore/<desired_object>/vote', methods=['POST'])
 def record_vote(desired_object):
-    this_object = PbObject.query.filter_by(name=desired_object).first()
-    if this_object:
-        new_vote_count = this_object.votes + 1
-        db.session.delete(this_object)
-        db.session.commit()
-    else:
-        new_vote_count = 1
-    new_object = PbObject(name=desired_object, votes=new_vote_count)
-    db.session.add(new_object)
-    db.session.commit()
+    votes_dict = get_votes_json()
+    votes_dict[desired_object] = (votes_dict[desired_object] + 1)
+    update_votes(votes_dict)
     return redirect(url_for('explore_details', desired_object=desired_object))
+
+
+def get_votes(object_name):
+    """Get the number of votes for the given object."""
+    votes_dict = get_votes_json()
+    if votes_dict.get(object_name):
+        return votes_dict[object_name]
+    else:
+        votes_dict[object_name] = 0
+        update_votes(votes_dict)
+        return 0
 
 
 @app.route('/explore/<desired_object>')
 def explore_details(desired_object):
-    try:
-        # get the votes for the given object
-        this_object = PbObject.query.filter_by(name=desired_object).first()
-        if this_object:
-            votes = this_object.votes
-        else:
-            votes = 0
-    except OperationalError as e:
-        print("OperationalError: recreating db")
-        db.create_all()
-        votes = 0
+    votes = get_votes(desired_object)
 
     # TODO: there is probably a better way to determine whether the object is a playbook, component, or playbook app
     for playbook in playbook_data:
