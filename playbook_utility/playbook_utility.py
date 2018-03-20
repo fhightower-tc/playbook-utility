@@ -52,7 +52,11 @@ def _read_data(tmp_dir_name, object_type):
                         with open(os.path.join(path, file_)) as f:
                             pb_json = json.load(f)
                             this_object_data['name'] = pb_json['name']
-                            this_object_data['description'] = pb_json['description']
+
+                            if pb_json.get('description'):
+                                this_object_data['description'] = pb_json['description']
+                            else:
+                                this_object_data['description'] = 'n/a'
                             this_object_data['pb_file_name'] = file_
                             this_object_data['raw_json'] = json.dumps(pb_json, indent=4)
                             this_object_data['last_updated'] = str(datetime.date.today())
