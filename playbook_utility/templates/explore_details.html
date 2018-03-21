@@ -21,7 +21,7 @@
     <br><br>
 
     (% if details.pb_file_name %)
-        <a class="button secondary" href="(( url_for('static', filename='pbs/' + details.pb_file_name) ))" download>Download playbook</a>
+        <a class="button secondary" href="(( url_for('static', filename=(( download_dir )) + '/' + details.pb_file_name) ))" download>Download playbook</a>
     (% endif %)
 
     <br><br><br><br><br>
