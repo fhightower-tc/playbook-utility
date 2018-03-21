@@ -318,6 +318,7 @@ def get_votes_json():
 
 def update_votes(new_votes_dict):
     """Update the votes data."""
+    print("updating votes.json with {}".format(new_votes_dict))
     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./votes.json")), 'w+') as f:
         json.dump(new_votes_dict, f)
 
@@ -334,8 +335,10 @@ def get_votes(object_name):
     """Get the number of votes for the given object."""
     votes_dict = get_votes_json()
     if votes_dict.get(object_name):
+        print("found votes for this object: {}".format(votes_dict[object_name]))
         return votes_dict[object_name]
     else:
+        print("object not found in the votes.json")
         votes_dict[object_name] = 0
         update_votes(votes_dict)
         return 0
