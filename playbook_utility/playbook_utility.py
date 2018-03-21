@@ -164,7 +164,7 @@ def _prepare_data():
         return _update_data()
     else:
         # check the last updated date of the first entry
-        if existing_pb_data[0]['last_updated'] == str(datetime.date.today()):
+        if existing_pb_data[0].get('last_updated') == str(datetime.date.today()):
             return existing_pb_data, existing_component_data, existing_app_data
         else:
             return _update_data()
