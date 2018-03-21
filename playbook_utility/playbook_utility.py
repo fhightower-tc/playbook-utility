@@ -167,6 +167,7 @@ def _prepare_data():
         if existing_pb_data[0].get('last_updated') == str(datetime.date.today()):
             return existing_pb_data, existing_component_data, existing_app_data
         else:
+            print("playbooks.json was not recently updated")
             return _update_data()
 
 
