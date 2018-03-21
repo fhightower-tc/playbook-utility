@@ -160,6 +160,7 @@ def _prepare_data():
         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json"))) as f:
             existing_app_data = json.load(f)
     except FileNotFoundError:
+        print("updating data b/c no playbooks.json was found")
         return _update_data()
     else:
         # check the last updated date of the first entry
