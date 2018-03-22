@@ -24,6 +24,8 @@
         <a class="button secondary" href="(( url_for('static', filename=(( download_dir )) + '/' + details.pb_file_name) ))" download>Download playbook</a>
     (% endif %)
 
+    <a class="button secondary" href="https://github.com/ThreatConnect-Inc/threatconnect-playbooks/issues/new?title=[(( details.name ))]:%20" target="_blank" title="Have a good idea or know of an issue for this playbook? Create an issue in github!"><i class="fas fa-external-link-alt"></i> Create an issue</a>
+
     <br><br><br><br><br>
 
     (% if details.raw_json %)
@@ -31,7 +33,7 @@
           <li>
             <a href="#">View Playbook File</a>
             <ul style="background-color: lightgrey;">
-                (( details.raw_json|safe ))
+                <pre>(( details.raw_json ))</pre>
             </ul>
           </li>
         </ul>
