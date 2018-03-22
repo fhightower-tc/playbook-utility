@@ -3,7 +3,7 @@
 (% extends "layout.html" %)
 (% block content %)
     <h2>(( details.name ))</h2><form action="(( url_for('record_vote', desired_object=details.name) ))" method="POST">
-        <button class="button secondary submit"><i class="fas fa-star"></i> (( votes ))</button>
+        <button class="button secondary submit" disabled><span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover='false' tabindex=1 title="This functionality coming soon!"><i class="fas fa-star"></i> (( votes ))</span></button>
     </form>
     (( details.description ))
     <!-- (% if details.readme %)

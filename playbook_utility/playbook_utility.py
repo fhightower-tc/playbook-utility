@@ -160,14 +160,12 @@ def _prepare_data():
         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json"))) as f:
             existing_app_data = json.load(f)
     except FileNotFoundError:
-        print("updating data b/c no playbooks.json was found")
         return _update_data()
     else:
         # check the last updated date of the first entry
         if existing_pb_data[0].get('last_updated') == str(datetime.date.today()):
             return existing_pb_data, existing_component_data, existing_app_data
         else:
-            print("playbooks.json was not recently updated")
             return _update_data()
 
 
@@ -320,7 +318,6 @@ def get_votes_json():
 
 def update_votes(new_votes_dict):
     """Update the votes data."""
-    print("updating votes.json with {}".format(new_votes_dict))
     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./votes.json")), 'w+') as f:
         json.dump(new_votes_dict, f)
 
@@ -337,10 +334,8 @@ def get_votes(object_name):
     """Get the number of votes for the given object."""
     votes_dict = get_votes_json()
     if votes_dict.get(object_name):
-        print("found votes for this object: {}".format(votes_dict[object_name]))
         return votes_dict[object_name]
     else:
-        print("object not found in the votes.json")
         votes_dict[object_name] = 0
         update_votes(votes_dict)
         return 0
