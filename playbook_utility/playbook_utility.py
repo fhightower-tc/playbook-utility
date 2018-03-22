@@ -356,7 +356,7 @@ def explore_details(desired_object):
 
     for app in app_data:
         if app['name'] == desired_object:
-            return render_template('explore_details.html', details=app, votes=votes, image_dir='apps_images')
+            return render_template('explore_details.html', details=app, votes=votes, download_dir='apps', image_dir='apps_images')
 
     flash('There is no playbook, component, or app with the name {}. Click on one of the playbooks below to explore it.'.format(desired_object), 'error')
     return redirect(url_for('explorer_index'))
