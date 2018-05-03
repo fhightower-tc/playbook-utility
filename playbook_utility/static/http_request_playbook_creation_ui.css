@@ -49,3 +49,7 @@ a {
 .dark a {
     color: #f8f8f8;
 }
+
+.docsEntry {
+    margin-left: 3em;
+}

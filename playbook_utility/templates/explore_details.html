@@ -11,33 +11,6 @@
         (( details.readme ))
     (% endif %) -->
 
-    (% if details.documentation %)
-        <h3>Documentation</h3>
-
-        (% if details.documentation.custom_metrics %)
-            <h4>Custom Metrics</h4>
-
-            <ul>
-                (% for custom_metric in details.documentation.custom_metrics %)
-                    <li>custom_metric.name:</li>
-                    <ul>
-                        <li>custom_metric.weight</li>
-                        <li>custom_metric.date</li>
-                        <li>custom_metric.value</li>
-                        <li>custom_metric.key</li>
-                    </ul>
-                (% endfor %)
-            </ul>
-        (% endif %)
-    (% endif %)
-
-    (% if details.images %)
-        <h3>Images</h3>
-        (% for image in details.images %)
-            <img src="(( url_for('static', filename=(( image_dir )) + '/' + image) ))"><br><br>
-        (% endfor %)
-    (% endif %)
-
     <br><br>
 
     (% if details.pb_file_name %)
@@ -48,7 +21,56 @@
 
     <a class="button secondary" href="https://github.com/ThreatConnect-Inc/threatconnect-playbooks/tree/master/(( download_dir ))" target="_blank" title="Have a good idea or know of an issue for this playbook? Create an issue in github!"><i class="fas fa-external-link-alt"></i> View in Github</a>
 
-    <br><br><br><br><br>
+    <br><br>
+
+    (% if details.documentation != {} %)
+        <h3>Documentation</h3>
+
+        (% if details.documentation.custom_metrics %)
+            <div class="docsEntry">
+                <h4>Custom Metrics Docs</h4>
+
+                <ul>
+                    <!-- TODO: only display a value is it is not empty -->
+                    (% for custom_metric in details.documentation.custom_metrics %)
+                        <li>Custom Metric Name: (( custom_metric.name ))</li>
+                        <ul>
+                            <li>Weight: (( custom_metric.weight ))</li>
+                            <li>Date: (( custom_metric.date ))</li>
+                            <li>Value: (( custom_metric.value ))</li>
+                            <li>Key: (( custom_metric.key ))</li>
+                        </ul>
+                    (% endfor %)
+                </ul>
+            </div>
+        (% endif %)
+
+        (% if details.documentation.datastores %)
+        <div class="docsEntry">
+            <h4 class="docsHeading">Datastore Docs</h4>
+
+            <ul>
+                <!-- TODO: only display a value is it is not empty -->
+                (% for datastore in details.documentation.datastores %)
+                    <li><code>(( datastore.db_method )) (( datastore.domain_type.lower() ))/(( datastore.type_name ))/(( datastore.path ))</code>:</li>
+                    <ul>
+                        <li>Datastore Entity: <code>(( datastore.request_entity ))</code></li>
+                        <li>Datastore Organization: (( datastore.organization_name ))</li>
+                    </ul>
+                (% endfor %)
+            </ul>
+        </div>
+        (% endif %)
+        <br><br>
+    (% endif %)
+
+    (% if details.images %)
+        <h3>Images</h3>
+        (% for image in details.images %)
+            <img src="(( url_for('static', filename=(( image_dir )) + '/' + image) ))"><br><br>
+        (% endfor %)
+        <br><br>
+    (% endif %)
 
     (% if details.raw_json %)
         <ul class="vertical menu" data-accordion-menu>
