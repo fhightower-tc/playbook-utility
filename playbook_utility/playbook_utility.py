@@ -14,7 +14,7 @@ import zipfile
 from flask import flash, Flask, render_template, redirect, request, url_for
 import requests
 
-from playbook_documenter import generate_documentation
+from .playbook_documenter import generate_documentation
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
