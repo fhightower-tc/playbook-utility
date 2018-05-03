@@ -11,6 +11,26 @@
         (( details.readme ))
     (% endif %) -->
 
+    (% if details.documentation %)
+        <h3>Documentation</h3>
+
+        (% if details.documentation.custom_metrics %)
+            <h4>Custom Metrics</h4>
+
+            <ul>
+                (% for custom_metric in details.documentation.custom_metrics %)
+                    <li>custom_metric.name:</li>
+                    <ul>
+                        <li>custom_metric.weight</li>
+                        <li>custom_metric.date</li>
+                        <li>custom_metric.value</li>
+                        <li>custom_metric.key</li>
+                    </ul>
+                (% endfor %)
+            </ul>
+        (% endif %)
+    (% endif %)
+
     (% if details.images %)
         <h3>Images</h3>
         (% for image in details.images %)

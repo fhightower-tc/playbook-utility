@@ -8,11 +8,13 @@ try:
     from StringIO import StringIO as ZipIO
 except:
     from io import BytesIO as ZipIO
-import zipfile
 import tempfile
+import zipfile
 
 from flask import flash, Flask, render_template, redirect, request, url_for
 import requests
+
+from playbook_documenter import generate_documentation
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -60,6 +62,7 @@ def _read_data(tmp_dir_name, object_type):
                             this_object_data['pb_file_name'] = file_
                             this_object_data['raw_json'] = json.dumps(pb_json, indent=4)
                             this_object_data['last_updated'] = str(datetime.date.today())
+                            this_object_data['documentation'] = generate_documentation(pb_json)
 
                         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}/{}".format(object_type, file_))), 'w') as f:
                             f.write(json.dumps(pb_json, indent=4))
