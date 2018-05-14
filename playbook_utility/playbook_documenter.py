@@ -45,6 +45,36 @@ def _generate_datastore_docs(playbook_json):
     return datastore_docs
 
 
+def _handle_variable_parameter_value(variable_parameter_value):
+    """Parse the details about a variable parameter."""
+    new_variable = {
+        'type': variable_parameter_value.split(':')[1],
+        'name': variable_parameter_value.split(':')[2]
+    }
+
+    return new_variable
+
+
+def _generate_variable_docs(playbook_json):
+    """Generate documentation for any variables used by the playbook."""
+    variable_docs = dict()
+
+    for job in playbook_json['jobList']:
+        if job.get('jobParameterList'):
+            for parameter in job['jobParameterList']:
+                if parameter.get('value'):
+                    if '${USER:' in parameter['value']:
+                        if not variable_docs.get('user_variables'):
+                            variable_docs['user_variables'] = list()
+                        variable_docs['user_variables'].append(_handle_variable_parameter_value(parameter['value']))
+                    elif '${ORGANIZATION:' in parameter['value']:
+                        if not variable_docs.get('org_variables'):
+                            variable_docs['org_variables'] = list()
+                        variable_docs['org_variables'].append(_handle_variable_parameter_value(parameter['value']))
+
+    return variable_docs
+
+
 def generate_documentation(playbook_json):
     """Generate documentation for the given playbook."""
     documentation = dict()
@@ -56,5 +86,9 @@ def generate_documentation(playbook_json):
     datastore_docs = _generate_datastore_docs(playbook_json)
     if datastore_docs:
         documentation['datastores'] = datastore_docs
+
+    variable_docs = _generate_variable_docs(playbook_json)
+    if variable_docs:
+        documentation['variables'] = variable_docs
 
     return documentation

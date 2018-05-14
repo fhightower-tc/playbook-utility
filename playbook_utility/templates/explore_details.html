@@ -61,6 +61,32 @@
             </ul>
         </div>
         (% endif %)
+
+        (% if details.documentation.variables.user_variables|length > 0 %)
+        <div class="docsEntry">
+            <h4 class="docsHeading">User Variable Docs</h4>
+
+            <ul>
+                <!-- TODO: only display a value is it is not empty -->
+                (% for variable in details.documentation.variables.user_variables %)
+                    <li>(( variable.type )): (( variable.name ))</li>
+                (% endfor %)
+            </ul>
+        </div>
+        (% endif %)
+
+        (% if details.documentation.variables.org_variables|length > 0 %)
+        <div class="docsEntry">
+            <h4 class="docsHeading">Organization Variable Docs</h4>
+
+            <ul>
+                <!-- TODO: only display a value is it is not empty -->
+                (% for variable in details.documentation.variables.org_variables %)
+                    <li>(( variable.type )): (( variable.name ))</li>
+                (% endfor %)
+            </ul>
+            </div>
+        (% endif %)
         <br><br>
     (% endif %)
 
