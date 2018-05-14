@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
+
 
 def _find_value_of_parameter_by_name(parameter_list, name):
     for parameter in parameter_list:
@@ -45,11 +47,20 @@ def _generate_datastore_docs(playbook_json):
     return datastore_docs
 
 
-def _handle_variable_parameter_value(variable_parameter_value):
+def _handle_variable_parameter_value(variable_parameter_value, existing_parameters):
     """Parse the details about a variable parameter."""
+    variable_name_pattern = '\$\{(?:ORGANIZATION|USER):(?:KEYCHAIN|TEXT):(.*?)}'
+    variable_type_pattern = '\$\{(?:ORGANIZATION|USER):(KEYCHAIN|TEXT):'
+    new_variable_name = re.findall(variable_name_pattern, variable_parameter_value)[0]
+    new_variable_type = re.findall(variable_type_pattern, variable_parameter_value)[0].lower()
+
+    for parameter in existing_parameters:
+        if new_variable_name == parameter['name'] and new_variable_type == parameter['type']:
+            return
+
     new_variable = {
-        'type': variable_parameter_value.split(':')[1],
-        'name': variable_parameter_value.split(':')[2]
+        'type': new_variable_type,
+        'name': new_variable_name
     }
 
     return new_variable
@@ -66,11 +77,15 @@ def _generate_variable_docs(playbook_json):
                     if '${USER:' in parameter['value']:
                         if not variable_docs.get('user_variables'):
                             variable_docs['user_variables'] = list()
-                        variable_docs['user_variables'].append(_handle_variable_parameter_value(parameter['value']))
+                        new_variable_docs = _handle_variable_parameter_value(parameter['value'], variable_docs['user_variables'])
+                        if new_variable_docs is not None:
+                            variable_docs['user_variables'].append(new_variable_docs)
                     elif '${ORGANIZATION:' in parameter['value']:
                         if not variable_docs.get('org_variables'):
                             variable_docs['org_variables'] = list()
-                        variable_docs['org_variables'].append(_handle_variable_parameter_value(parameter['value']))
+                        new_variable_docs = _handle_variable_parameter_value(parameter['value'], variable_docs['org_variables'])
+                        if new_variable_docs is not None:
+                            variable_docs['org_variables'].append(new_variable_docs)
 
     return variable_docs
 
