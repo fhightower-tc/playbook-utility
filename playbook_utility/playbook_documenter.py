@@ -90,6 +90,18 @@ def _generate_variable_docs(playbook_json):
     return variable_docs
 
 
+def _generate_internal_variables(playbook_json):
+    """Generate documentation for all of the variables which are declared within the app."""
+    internal_variable_docs = list()
+
+    for job in pb_json['jobList']:
+        if 'SetVariable' in job['appCatalogItem']['programName']:
+            variable_mappings = json.loads(_find_value_of_parameter_by_name(job['jobParameterList'], 'variable_mapping'))
+            internal_variable_docs.extend(variable_mappings)
+
+    return internal_variable_docs
+
+
 def generate_documentation(playbook_json):
     """Generate documentation for the given playbook."""
     documentation = dict()
@@ -105,5 +117,9 @@ def generate_documentation(playbook_json):
     variable_docs = _generate_variable_docs(playbook_json)
     if variable_docs:
         documentation['variables'] = variable_docs
+
+    internal_variables = _generate_internal_variables(playbook_json)
+    if internal_variables:
+        documentation['internal_variables'] = internal_variables
 
     return documentation

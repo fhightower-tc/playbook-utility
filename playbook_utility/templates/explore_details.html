@@ -30,6 +30,8 @@
             <div class="docsEntry">
                 <h4>Custom Metrics</h4>
 
+                <i>This playbook uses the following custom metrics [<a href="https://docs.threatconnect.com/en/latest/rest_api/custom_metrics/custom_metrics.html#custom-metrics">learn more</a>]:</i>
+
                 <ul>
                     <!-- TODO: only display a value is it is not empty -->
                     (% for custom_metric in details.documentation.custom_metrics %)
@@ -49,6 +51,8 @@
         <div class="docsEntry">
             <h4 class="docsHeading">Datastores</h4>
 
+            <i>This playbook uses the following datastores:</i>
+
             <ul>
                 <!-- TODO: only display a value is it is not empty -->
                 (% for datastore in details.documentation.datastores %)
@@ -66,6 +70,8 @@
         <div class="docsEntry">
             <h4 class="docsHeading">User Variables</h4>
 
+            <i>This playbook expects the following user variables:</i>
+
             <ul>
                 <!-- TODO: only display a value is it is not empty -->
                 (% for variable in details.documentation.variables.user_variables %)
@@ -79,10 +85,27 @@
         <div class="docsEntry">
             <h4 class="docsHeading">Organization Variables</h4>
 
+            <i>This playbook expects the following organization variables:</i>
+
             <ul>
                 <!-- TODO: only display a value is it is not empty -->
                 (% for variable in details.documentation.variables.org_variables %)
                     <li>(( variable.type )): (( variable.name ))</li>
+                (% endfor %)
+            </ul>
+            </div>
+        (% endif %)
+
+        (% if details.documentation.internal_variables %)
+        <div class="docsEntry">
+            <h4 class="docsHeading">Variables Declared in the Playbook</h4>
+
+            <i>The following variables are declared in this playbook:</i>
+
+            <ul>
+                <!-- TODO: only display a value is it is not empty -->
+                (% for variable in details.documentation.internal_variables %)
+                    <li>(( variable.key )): (( variable.value ))</li>
                 (% endfor %)
             </ul>
             </div>
