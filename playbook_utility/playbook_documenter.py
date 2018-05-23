@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import json
 import re
 
 
@@ -94,7 +95,7 @@ def _generate_internal_variables(playbook_json):
     """Generate documentation for all of the variables which are declared within the app."""
     internal_variable_docs = list()
 
-    for job in pb_json['jobList']:
+    for job in playbook_json['jobList']:
         if 'SetVariable' in job['appCatalogItem']['programName']:
             variable_mappings = json.loads(_find_value_of_parameter_by_name(job['jobParameterList'], 'variable_mapping'))
             internal_variable_docs.extend(variable_mappings)

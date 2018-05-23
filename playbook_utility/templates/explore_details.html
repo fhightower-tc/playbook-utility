@@ -66,34 +66,36 @@
         </div>
         (% endif %)
 
-        (% if details.documentation.variables.user_variables|length > 0 %)
-        <div class="docsEntry">
-            <h4 class="docsHeading">User Variables</h4>
+        (% if details.documentation.variables|length > 0 %)
+            (% if details.documentation.variables.user_variables|length > 0 %)
+            <div class="docsEntry">
+                <h4 class="docsHeading">User Variables</h4>
 
-            <i>This playbook expects the following user variables:</i>
+                <i>This playbook expects the following user variables:</i>
 
-            <ul>
-                <!-- TODO: only display a value is it is not empty -->
-                (% for variable in details.documentation.variables.user_variables %)
-                    <li>(( variable.type )): (( variable.name ))</li>
-                (% endfor %)
-            </ul>
-        </div>
-        (% endif %)
-
-        (% if details.documentation.variables.org_variables|length > 0 %)
-        <div class="docsEntry">
-            <h4 class="docsHeading">Organization Variables</h4>
-
-            <i>This playbook expects the following organization variables:</i>
-
-            <ul>
-                <!-- TODO: only display a value is it is not empty -->
-                (% for variable in details.documentation.variables.org_variables %)
-                    <li>(( variable.type )): (( variable.name ))</li>
-                (% endfor %)
-            </ul>
+                <ul>
+                    <!-- TODO: only display a value is it is not empty -->
+                    (% for variable in details.documentation.variables.user_variables %)
+                        <li>(( variable.type )): (( variable.name ))</li>
+                    (% endfor %)
+                </ul>
             </div>
+            (% endif %)
+
+            (% if details.documentation.variables.org_variables|length > 0 %)
+            <div class="docsEntry">
+                <h4 class="docsHeading">Organization Variables</h4>
+
+                <i>This playbook expects the following organization variables:</i>
+
+                <ul>
+                    <!-- TODO: only display a value is it is not empty -->
+                    (% for variable in details.documentation.variables.org_variables %)
+                        <li>(( variable.type )): (( variable.name ))</li>
+                    (% endfor %)
+                </ul>
+                </div>
+            (% endif %)
         (% endif %)
 
         (% if details.documentation.internal_variables %)
