@@ -1,6 +1,6 @@
 # Playbook Utility
 
-[![Build Status](https://travis-ci.org/fhightower/playbook-utility.svg?branch=master)](https://travis-ci.org/fhightower/playbook-utility)
+[![Build Status](https://travis-ci.org/fhightower-tc/playbook-utility.svg?branch=master)](https://travis-ci.org/fhightower-tc/playbook-utility)
 
 Helpful tools for creating and viewing ThreatConnect playbooks, components, and playbook apps: [http://playbooks.hightower.space/](http://playbooks.hightower.space/).
 
