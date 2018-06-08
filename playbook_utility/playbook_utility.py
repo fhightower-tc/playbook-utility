@@ -80,9 +80,10 @@ def _read_data(tmp_dir_name, object_type):
 
                                 with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}_images/{}".format(object_type, file_))), 'wb') as f:
                                     f.write(image_file_text)
-
                                 this_object_data['images'].append(file_)
             elif object_type == 'apps':
+                # create an empty documentation object
+                this_object_data['documentation'] = dict()
                 for file_ in files:
                     if file_.lower() == 'readme.md':
                         with open(os.path.join(path, file_)) as f:
@@ -118,7 +119,6 @@ def _read_data(tmp_dir_name, object_type):
 
                                 with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}_images/{}".format(object_type, file_))), 'wb') as f:
                                     f.write(image_file_text)
-
                                 this_object_data['images'].append(file_)
             break
 
