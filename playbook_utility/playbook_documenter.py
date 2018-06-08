@@ -23,6 +23,29 @@ def _generate_trigger_docs(playbook_json):
 
         return triggers
 
+
+def _generate_http_link_docs(playbook_json):
+    """Generate documentation for an http link."""
+    http_link_docs = list()
+    link_id = ''
+
+    for playbook_trigger in playbook_json['playbookTriggerList']:
+        if playbook_trigger['type'] == 'HttpLink':
+            link_id = playbook_trigger['id']
+            break
+
+    for job in playbook_json['jobList']:
+        pattern = '{}:trg\.http\.(.*?)!'.format(link_id)
+        matches = re.findall(pattern, json.dumps(job))
+        if matches:
+            for match in matches:
+                http_link_docs.append({
+                    'part': match,
+                    'app': job['name']
+                })
+    return http_link_docs
+
+
 def _generate_custom_metrics_docs(playbook_json):
     """Generate docs for any custom metrics referenced in the playbook."""
     custom_metric_docs = list()
@@ -120,6 +143,11 @@ def generate_documentation(playbook_json):
     trigger_docs = _generate_trigger_docs(playbook_json)
     if trigger_docs:
         documentation['trigger'] = trigger_docs
+
+        if 'HttpLink' in trigger_docs:
+            http_link_docs = _generate_http_link_docs(playbook_json)
+            if http_link_docs:
+                documentation['http_link'] = http_link_docs
 
     custom_metric_docs = _generate_custom_metrics_docs(playbook_json)
     if custom_metric_docs:

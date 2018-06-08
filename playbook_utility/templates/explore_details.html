@@ -41,6 +41,21 @@
             <br>
         (% endif %)
 
+        (% if details.documentation.http_link %)
+            <div class="docsEntry">
+                <h4>HTTP Link Trigger Details</h4>
+                <i>This playbook uses an HTTP trigger. The following parts of the request sent to trigger this playbook are used in the playbook:</i>
+
+                <ul>
+                    (% for request_part in details.documentation.http_link %)
+                        <li>(( request_part.app )): (( request_part.part ))</li>
+                    (% endfor %)
+                </ul>
+            </div>
+
+            <br>
+        (% endif %)
+
         (% if details.documentation.custom_metrics %)
             <div class="docsEntry">
                 <h4>Custom Metrics</h4>
