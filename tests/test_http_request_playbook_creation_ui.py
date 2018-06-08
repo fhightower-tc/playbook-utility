@@ -29,7 +29,7 @@ class HttpRequestPlaybookCreationUiTestCase(unittest.TestCase):
         check_requester_index(rv.data.decode())
 
     def test_json_parse(self):
-        rv = self.app.get('requester/json?url=https%3A%2F%2Fioc-fang.github.io%2Fdatasets%2Ffang.json')
+        rv = self.app.post('requester/json', data={'url': 'https://ioc-fang.github.io/datasets/fang.json'})
         check_heading(rv.data.decode())
         assert '[.]' in rv.data.decode()
         assert 'xxxxx://' in rv.data.decode()
@@ -37,7 +37,7 @@ class HttpRequestPlaybookCreationUiTestCase(unittest.TestCase):
 
     def test_empty_json_parse(self):
         """Make sure an error message is shown if no content is given to the json path."""
-        rv = self.app.get('requester/json', follow_redirects=True)
+        rv = self.app.post('requester/json', follow_redirects=True)
         check_requester_index(rv.data.decode())
         assert "Please enter a URL or some json before continuing." in rv.data.decode()
 

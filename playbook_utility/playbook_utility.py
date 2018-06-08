@@ -182,18 +182,18 @@ def requester_index():
     return render_template("requester_index.html")
 
 
-@app.route("/requester/json")
+@app.route("/requester/json", methods=['POST'])
 def parse_json():
-    if request.args.get('url'):
-        r = requests.get(request.args['url'])
+    if request.form.get('url'):
+        r = requests.get(request.form['url'])
 
         if r.ok:
-            return render_template("json.html", responseData=r.text, url=request.args['url'])
+            return render_template("json.html", responseData=r.text, url=request.form['url'])
         else:
             flash('Got a {} response code from {}. Please try another site or copy the json and paste it into the text area below.'.format(r.status_code, request.args['url']), 'error')
             return redirect(url_for('requester_index'))
-    elif request.args.get('json'):
-        return render_template("json.html", responseData=request.args['json'], url='N/A')
+    elif request.form.get('json'):
+        return render_template("json.html", responseData=request.form['json'], url='N/A')
     else:
         flash('Please enter a URL or some json before continuing.', 'error')
         return redirect(url_for('requester_index'))

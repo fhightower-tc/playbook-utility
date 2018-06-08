@@ -11,7 +11,7 @@
     (% endwith %)
 </div>
 
-<form action="(( url_for('parse_json') ))">
+<form action="(( url_for('parse_json') ))" method="POST">
     <input type="text" name="url" placeholder="Enter the url you would like to request...">
     <a href="(( url_for('parse_json', url='https://ioc-fang.github.io/datasets/fang.json') ))">Try 'https://ioc-fang.github.io/datasets/fang.json'</a>
     <input class="button blue float-right" type="submit" value="Submit URL">
