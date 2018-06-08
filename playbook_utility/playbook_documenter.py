@@ -13,6 +13,16 @@ def _find_value_of_parameter_by_name(parameter_list, name):
     return None
 
 
+def _generate_trigger_docs(playbook_json):
+    """Generate docs for the trigger of the pb/component."""
+    triggers = list()
+    if playbook_json.get('playbookTriggerList'):
+        for playbook_trigger in playbook_json['playbookTriggerList']:
+            if playbook_trigger.get('type'):
+                triggers.append(playbook_trigger.get('type'))
+
+        return triggers
+
 def _generate_custom_metrics_docs(playbook_json):
     """Generate docs for any custom metrics referenced in the playbook."""
     custom_metric_docs = list()
@@ -106,6 +116,10 @@ def _generate_internal_variables(playbook_json):
 def generate_documentation(playbook_json):
     """Generate documentation for the given playbook."""
     documentation = dict()
+
+    trigger_docs = _generate_trigger_docs(playbook_json)
+    if trigger_docs:
+        documentation['trigger'] = trigger_docs
 
     custom_metric_docs = _generate_custom_metrics_docs(playbook_json)
     if custom_metric_docs:

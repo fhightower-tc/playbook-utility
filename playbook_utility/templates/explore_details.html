@@ -26,6 +26,21 @@
     (% if details.documentation != {} %)
         <h3>Documentation</h3>
 
+        (% if details.documentation.trigger %)
+            <div class="docsEntry">
+                <h4>Trigger</h4>
+                <i>This playbook/component is triggered with the following triggers:</i>
+
+                <ul>
+                    (% for trigger in details.documentation.trigger %)
+                        <li>(( trigger ))</li>
+                    (% endfor %)
+                </ul>
+            </div>
+
+            <br>
+        (% endif %)
+
         (% if details.documentation.custom_metrics %)
             <div class="docsEntry">
                 <h4>Custom Metrics</h4>
@@ -45,25 +60,27 @@
                     (% endfor %)
                 </ul>
             </div>
+            <br>
         (% endif %)
 
         (% if details.documentation.datastores %)
-        <div class="docsEntry">
-            <h4 class="docsHeading">Datastores</h4>
+            <div class="docsEntry">
+                <h4 class="docsHeading">Datastores</h4>
 
-            <i>This playbook uses the following datastores:</i>
+                <i>This playbook uses the following datastores:</i>
 
-            <ul>
-                <!-- TODO: only display a value is it is not empty -->
-                (% for datastore in details.documentation.datastores %)
-                    <li><code>(( datastore.db_method )) (( datastore.domain_type.lower() ))/(( datastore.type_name ))/(( datastore.path ))</code>:</li>
-                    <ul>
-                        <li>Datastore Entity: <code>(( datastore.request_entity ))</code></li>
-                        <li>Datastore Organization: (( datastore.organization_name ))</li>
-                    </ul>
-                (% endfor %)
-            </ul>
-        </div>
+                <ul>
+                    <!-- TODO: only display a value is it is not empty -->
+                    (% for datastore in details.documentation.datastores %)
+                        <li><code>(( datastore.db_method )) (( datastore.domain_type.lower() ))/(( datastore.type_name ))/(( datastore.path ))</code>:</li>
+                        <ul>
+                            <li>Datastore Entity: <code>(( datastore.request_entity ))</code></li>
+                            <li>Datastore Organization: (( datastore.organization_name ))</li>
+                        </ul>
+                    (% endfor %)
+                </ul>
+            </div>
+            <br>
         (% endif %)
 
         (% if details.documentation.variables|length > 0 %)
@@ -96,6 +113,7 @@
                 </ul>
                 </div>
             (% endif %)
+            <br>
         (% endif %)
 
         (% if details.documentation.internal_variables %)
