@@ -16,6 +16,7 @@ import requests
 
 from .playbook_documenter import generate_documentation
 
+
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
     jinja_options.update(dict(
