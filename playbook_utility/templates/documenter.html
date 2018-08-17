@@ -1,0 +1,44 @@
+(% extends "layout.html" %)
+(% block content %)
+
+(% if not html_docs %)
+<h3>Create Documentation for a Playbook/Component</h3>
+<p>Paste a ThreatConnect playbook/component below to create documentation for it:</p>
+(% endif %)
+(% with messages = get_flashed_messages(with_categories=true) %)
+  (% if messages %)
+    (% for category, message in messages %)
+      <span class="(( category ))">(( message ))</span>
+    (% endfor %)
+  (% endif %)
+(% endwith %)
+
+(% if html_docs %)
+    (( html_docs|safe ))
+
+    <textarea id="markdownDocs" style="opacity: 0;">(( markdown_docs ))</textarea>
+    <button class="button blue" onclick="copyText('markdownDocs')">Copy documentation as markdown</button>
+(% else %)
+    <form action="(( url_for('document_playbook') ))" method="post">
+        <!-- <input type="text" name="domain" placeholder="Enter a domain name..."> -->
+        <textarea name="playbook" placeholder="Paste pb contents here..." rows="20"></textarea>
+        <input type="submit" class="button blue">
+    </form>
+(% endif %)
+
+<script>
+    function copyText(elementId) {
+        /* Copy the text from the given element. */
+        var textArea = document.getElementById(elementId);
+        textArea.select();
+        var copied = document.execCommand("copy");
+        if (copied) {
+            textArea.blur();
+            $.jGrowl('Text copied', {group: 'success-growl'});
+        } else {
+            $.jGrowl('Unable to copy text', {group: 'failure-growl'});
+        }
+    }
+</script>
+
+(% endblock %)

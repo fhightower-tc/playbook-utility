@@ -14,7 +14,8 @@ import zipfile
 from flask import flash, Flask, render_template, redirect, request, url_for
 import requests
 
-from .playbook_documenter import generate_documentation
+# from playbook_documenter import generate_documentation
+import playbook_documenter
 
 
 class CustomFlask(Flask):
@@ -28,149 +29,150 @@ class CustomFlask(Flask):
         comment_end_string='#)',
     ))
 
+
 app = CustomFlask(__name__)
 app.secret_key = 'abc'
 
 
-def _read_data(tmp_dir_name, object_type):
-    # TODO: A lot of the code in this function can be consolidated... I haven't taken the time to do this yet, but it needs to be done eventually
-    object_data = list()
+# def _read_data(tmp_dir_name, object_type):
+#     # TODO: A lot of the code in this function can be consolidated... I haven't taken the time to do this yet, but it needs to be done eventually
+#     object_data = list()
 
-    # find the base pb path as well as all of the playbook directories
-    for path, dirs, files in os.walk(os.path.join(tmp_dir_name, 'threatconnect-playbooks-master/{}'.format(object_type))):
-        object_base_path = path
-        object_dirs = dirs
-        break
+#     # find the base pb path as well as all of the playbook directories
+#     for path, dirs, files in os.walk(os.path.join(tmp_dir_name, 'threatconnect-playbooks-master/{}'.format(object_type))):
+#         object_base_path = path
+#         object_dirs = dirs
+#         break
 
-    # handle each playbook
-    for object_dir in object_dirs:
-        for path, dirs, files in os.walk(os.path.join(object_base_path, object_dir)):
-            this_object_data = dict()
-            if object_type == 'playbooks' or object_type == 'components':
-                for file_ in files:
-                    if file_.lower() == 'readme.md':
-                        with open(os.path.join(path, file_)) as f:
-                            this_object_data['readme'] = f.read()
-                    elif file_.lower().endswith('.pbx'):
-                        with open(os.path.join(path, file_)) as f:
-                            pb_json = json.load(f)
-                            this_object_data['name'] = pb_json['name']
+#     # handle each playbook
+#     for object_dir in object_dirs:
+#         for path, dirs, files in os.walk(os.path.join(object_base_path, object_dir)):
+#             this_object_data = dict()
+#             if object_type == 'playbooks' or object_type == 'components':
+#                 for file_ in files:
+#                     if file_.lower() == 'readme.md':
+#                         with open(os.path.join(path, file_)) as f:
+#                             this_object_data['readme'] = f.read()
+#                     elif file_.lower().endswith('.pbx'):
+#                         with open(os.path.join(path, file_)) as f:
+#                             pb_json = json.load(f)
+#                             this_object_data['name'] = pb_json['name']
 
-                            if pb_json.get('description'):
-                                this_object_data['description'] = pb_json['description']
-                            else:
-                                this_object_data['description'] = 'n/a'
-                            this_object_data['pb_file_name'] = file_
-                            this_object_data['raw_json'] = json.dumps(pb_json, indent=4)
-                            this_object_data['last_updated'] = str(datetime.date.today())
-                            this_object_data['documentation'] = generate_documentation(pb_json)
+#                             if pb_json.get('description'):
+#                                 this_object_data['description'] = pb_json['description']
+#                             else:
+#                                 this_object_data['description'] = 'n/a'
+#                             this_object_data['pb_file_name'] = file_
+#                             this_object_data['raw_json'] = json.dumps(pb_json, indent=4)
+#                             this_object_data['last_updated'] = str(datetime.date.today())
+#                             this_object_data['documentation'] = generate_documentation(pb_json)
 
-                        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}/{}".format(object_type, file_))), 'w') as f:
-                            f.write(json.dumps(pb_json, indent=4))
+#                         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}/{}".format(object_type, file_))), 'w') as f:
+#                             f.write(json.dumps(pb_json, indent=4))
 
-                # if there is an `images` directory in the playbook's directory, pull out all of those images
-                if 'images' in dirs:
-                    for path, dirs, files in os.walk(os.path.join(object_base_path, object_dir, 'images')):
-                        for file_ in files:
-                            if file_.lower().endswith('.jpg') or file_.lower().endswith('.png'):
-                                if not this_object_data.get('images'):
-                                    this_object_data['images'] = list()
-                                image_file_text = str()
-                                with open(os.path.join(path, file_), 'rb') as f:
-                                    image_file_text = f.read()
+#                 # if there is an `images` directory in the playbook's directory, pull out all of those images
+#                 if 'images' in dirs:
+#                     for path, dirs, files in os.walk(os.path.join(object_base_path, object_dir, 'images')):
+#                         for file_ in files:
+#                             if file_.lower().endswith('.jpg') or file_.lower().endswith('.png'):
+#                                 if not this_object_data.get('images'):
+#                                     this_object_data['images'] = list()
+#                                 image_file_text = str()
+#                                 with open(os.path.join(path, file_), 'rb') as f:
+#                                     image_file_text = f.read()
 
-                                with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}_images/{}".format(object_type, file_))), 'wb') as f:
-                                    f.write(image_file_text)
-                                this_object_data['images'].append(file_)
-            elif object_type == 'apps':
-                # create an empty documentation object
-                this_object_data['documentation'] = dict()
-                for file_ in files:
-                    if file_.lower() == 'readme.md':
-                        with open(os.path.join(path, file_)) as f:
-                            this_object_data['readme'] = f.read()
-                    elif file_.lower() == 'install.json':
-                        with open(os.path.join(path, file_)) as f:
-                            install_json = json.load(f)
-                            if install_json.get('note'):
-                                this_object_data['description'] = install_json['note']
-                            this_object_data['name'] = install_json['displayName']
-                            this_object_data['last_updated'] = str(datetime.date.today())
-                    # this handles apps packaged from http://tcex.hightower.space/
-                    elif file_.lower() == '.bumpversion.cfg':
-                        # todo: add a check to make sure there is only one directory found here
-                        app_dir = [dir_ for dir_ in dirs if not dir_.startswith('test')][0]
-                        with open(os.path.join(path, app_dir, 'install.json')) as f:
-                            install_json = json.load(f)
-                            if install_json.get('note'):
-                                this_object_data['description'] = install_json['note']
-                            this_object_data['name'] = install_json['displayName']
-                            this_object_data['last_updated'] = str(datetime.date.today())
+#                                 with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}_images/{}".format(object_type, file_))), 'wb') as f:
+#                                     f.write(image_file_text)
+#                                 this_object_data['images'].append(file_)
+#             elif object_type == 'apps':
+#                 # create an empty documentation object
+#                 this_object_data['documentation'] = dict()
+#                 for file_ in files:
+#                     if file_.lower() == 'readme.md':
+#                         with open(os.path.join(path, file_)) as f:
+#                             this_object_data['readme'] = f.read()
+#                     elif file_.lower() == 'install.json':
+#                         with open(os.path.join(path, file_)) as f:
+#                             install_json = json.load(f)
+#                             if install_json.get('note'):
+#                                 this_object_data['description'] = install_json['note']
+#                             this_object_data['name'] = install_json['displayName']
+#                             this_object_data['last_updated'] = str(datetime.date.today())
+#                     # this handles apps packaged from http://tcex.hightower.space/
+#                     elif file_.lower() == '.bumpversion.cfg':
+#                         # todo: add a check to make sure there is only one directory found here
+#                         app_dir = [dir_ for dir_ in dirs if not dir_.startswith('test')][0]
+#                         with open(os.path.join(path, app_dir, 'install.json')) as f:
+#                             install_json = json.load(f)
+#                             if install_json.get('note'):
+#                                 this_object_data['description'] = install_json['note']
+#                             this_object_data['name'] = install_json['displayName']
+#                             this_object_data['last_updated'] = str(datetime.date.today())
 
-                # if there is an `images` directory in the playbook's directory, pull out all of those images
-                if 'images' in dirs:
-                    for path, dirs, files in os.walk(os.path.join(object_base_path, object_dir, 'images')):
-                        for file_ in files:
-                            if file_.lower().endswith('.jpg') or file_.lower().endswith('.png'):
-                                if not this_object_data.get('images'):
-                                    this_object_data['images'] = list()
-                                image_file_text = str()
-                                with open(os.path.join(path, file_), 'rb') as f:
-                                    image_file_text = f.read()
+#                 # if there is an `images` directory in the playbook's directory, pull out all of those images
+#                 if 'images' in dirs:
+#                     for path, dirs, files in os.walk(os.path.join(object_base_path, object_dir, 'images')):
+#                         for file_ in files:
+#                             if file_.lower().endswith('.jpg') or file_.lower().endswith('.png'):
+#                                 if not this_object_data.get('images'):
+#                                     this_object_data['images'] = list()
+#                                 image_file_text = str()
+#                                 with open(os.path.join(path, file_), 'rb') as f:
+#                                     image_file_text = f.read()
 
-                                with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}_images/{}".format(object_type, file_))), 'wb') as f:
-                                    f.write(image_file_text)
-                                this_object_data['images'].append(file_)
-            break
+#                                 with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./static/{}_images/{}".format(object_type, file_))), 'wb') as f:
+#                                     f.write(image_file_text)
+#                                 this_object_data['images'].append(file_)
+#             break
 
-        if this_object_data != {}:
-            object_data.append(this_object_data)
+#         if this_object_data != {}:
+#             object_data.append(this_object_data)
 
-    return object_data
-
-
-def _update_data():
-    """Update the list of publicly available playbooks."""
-    with tempfile.TemporaryDirectory() as tmp_dir_name:
-        response = requests.get('https://github.com/ThreatConnect-Inc/threatconnect-playbooks/archive/master.zip')
-        with zipfile.ZipFile(ZipIO(response.content)) as pb_zip:
-            pb_zip.extractall(tmp_dir_name)
-
-            playbook_data = _read_data(tmp_dir_name, 'playbooks')
-            component_data = _read_data(tmp_dir_name, 'components')
-            app_data = _read_data(tmp_dir_name, 'apps')
-
-    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./playbooks.json")), 'w+') as f:
-        json.dump(playbook_data, f)
-
-    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./components.json")), 'w+') as f:
-        json.dump(component_data, f)
-
-    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json")), 'w+') as f:
-        json.dump(app_data, f)
-
-    return playbook_data, component_data, app_data
+#     return object_data
 
 
-def _prepare_data():
-    """Create a data structure with all of the publicly available playbooks, components, and apps."""
-    try:
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./playbooks.json"))) as f:
-            existing_pb_data = json.load(f)
+# def _update_data():
+#     """Update the list of publicly available playbooks."""
+#     with tempfile.TemporaryDirectory() as tmp_dir_name:
+#         response = requests.get('https://github.com/ThreatConnect-Inc/threatconnect-playbooks/archive/master.zip')
+#         with zipfile.ZipFile(ZipIO(response.content)) as pb_zip:
+#             pb_zip.extractall(tmp_dir_name)
 
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./components.json"))) as f:
-            existing_component_data = json.load(f)
+#             playbook_data = _read_data(tmp_dir_name, 'playbooks')
+#             component_data = _read_data(tmp_dir_name, 'components')
+#             app_data = _read_data(tmp_dir_name, 'apps')
 
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json"))) as f:
-            existing_app_data = json.load(f)
-    except FileNotFoundError:
-        return _update_data()
-    else:
-        # check the last updated date of the first entry
-        if existing_pb_data[0].get('last_updated') == str(datetime.date.today()):
-            return existing_pb_data, existing_component_data, existing_app_data
-        else:
-            return _update_data()
+#     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./playbooks.json")), 'w+') as f:
+#         json.dump(playbook_data, f)
+
+#     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./components.json")), 'w+') as f:
+#         json.dump(component_data, f)
+
+#     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json")), 'w+') as f:
+#         json.dump(app_data, f)
+
+#     return playbook_data, component_data, app_data
+
+
+# def _prepare_data():
+#     """Create a data structure with all of the publicly available playbooks, components, and apps."""
+#     try:
+#         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./playbooks.json"))) as f:
+#             existing_pb_data = json.load(f)
+
+#         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./components.json"))) as f:
+#             existing_component_data = json.load(f)
+
+#         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./apps.json"))) as f:
+#             existing_app_data = json.load(f)
+#     except FileNotFoundError:
+#         return _update_data()
+#     else:
+#         # check the last updated date of the first entry
+#         if existing_pb_data[0].get('last_updated') == str(datetime.date.today()):
+#             return existing_pb_data, existing_component_data, existing_app_data
+#         else:
+#             return _update_data()
 
 
 @app.route("/")
@@ -183,18 +185,29 @@ def requester_index():
     return render_template("requester_index.html")
 
 
-@app.route("/requester/json", methods=['POST'])
+@app.route("/requester/json", methods=['GET', 'POST'])
 def parse_json():
-    if request.form.get('url'):
-        r = requests.get(request.form['url'])
+    url = None
+
+    # handle GET requests (this is to support the example link on the index page)
+    if request.method == 'GET':
+        if request.args.get('url'):
+            url = request.args['url']
+    # handle POST requests
+    else:
+        if request.form.get('url'):
+            url = request.form['url']
+        elif request.form.get('json'):
+            return render_template("json.html", responseData=request.form['json'], url='N/A')
+
+    if url:
+        r = requests.get(url)
 
         if r.ok:
-            return render_template("json.html", responseData=r.text, url=request.form['url'])
+            return render_template("json.html", responseData=r.text, url=url)
         else:
-            flash('Got a {} response code from {}. Please try another site or copy the json and paste it into the text area below.'.format(r.status_code, request.args['url']), 'error')
+            flash('Got a {} response code from {}. Please try another site or copy the json and paste it into the text area below.'.format(r.status_code, url), 'error')
             return redirect(url_for('requester_index'))
-    elif request.form.get('json'):
-        return render_template("json.html", responseData=request.form['json'], url='N/A')
     else:
         flash('Please enter a URL or some json before continuing.', 'error')
         return redirect(url_for('requester_index'))
@@ -305,69 +318,82 @@ def create_playbook():
     return render_template("pb.html", partial_pb=rendered_partial_pb_template, full_pb=full_pb_template % (request.form['url'], request.form['url'], rendered_partial_pb_template))
 
 
-@app.route("/explore")
-def explorer_index():
-    return render_template("explorer_index.html", playbooks=playbook_data, components=component_data, apps=app_data)
+# @app.route("/explore")
+# def explorer_index():
+#     return render_template("explorer_index.html", playbooks=playbook_data, components=component_data, apps=app_data)
 
 
-def get_votes_json():
-    """Read and return the votes.json file."""
-    try:
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./votes.json")), 'r') as f:
-            votes_dict = json.load(f)
-    except FileNotFoundError:
-        votes_dict = dict()
-    return votes_dict
+# def get_votes_json():
+#     """Read and return the votes.json file."""
+#     try:
+#         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./votes.json")), 'r') as f:
+#             votes_dict = json.load(f)
+#     except FileNotFoundError:
+#         votes_dict = dict()
+#     return votes_dict
 
 
-def update_votes(new_votes_dict):
-    """Update the votes data."""
-    with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./votes.json")), 'w+') as f:
-        json.dump(new_votes_dict, f)
+# def update_votes(new_votes_dict):
+#     """Update the votes data."""
+#     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "./votes.json")), 'w+') as f:
+#         json.dump(new_votes_dict, f)
 
 
-@app.route('/explore/<desired_object>/vote', methods=['POST'])
-def record_vote(desired_object):
-    votes_dict = get_votes_json()
-    votes_dict[desired_object] = (votes_dict[desired_object] + 1)
-    update_votes(votes_dict)
-    return redirect(url_for('explore_details', desired_object=desired_object))
+# @app.route('/explore/<desired_object>/vote', methods=['POST'])
+# def record_vote(desired_object):
+#     votes_dict = get_votes_json()
+#     votes_dict[desired_object] = (votes_dict[desired_object] + 1)
+#     update_votes(votes_dict)
+#     return redirect(url_for('explore_details', desired_object=desired_object))
 
 
-def get_votes(object_name):
-    """Get the number of votes for the given object."""
-    votes_dict = get_votes_json()
-    if votes_dict.get(object_name):
-        return votes_dict[object_name]
+# def get_votes(object_name):
+#     """Get the number of votes for the given object."""
+#     votes_dict = get_votes_json()
+#     if votes_dict.get(object_name):
+#         return votes_dict[object_name]
+#     else:
+#         votes_dict[object_name] = 0
+#         update_votes(votes_dict)
+#         return 0
+
+
+# @app.route('/explore/<desired_object>')
+# def explore_details(desired_object):
+#     votes = get_votes(desired_object)
+
+#     # TODO: there is probably a better way to determine whether the object is a playbook, component, or playbook app
+#     for playbook in playbook_data:
+#         if playbook['name'] == desired_object:
+#             return render_template('explore_details.html', details=playbook, votes=votes, download_dir='playbooks', image_dir='playbooks_images')
+
+#     for component in component_data:
+#         if component['name'] == desired_object:
+#             return render_template('explore_details.html', details=component, votes=votes, download_dir='components', image_dir='components_images')
+
+#     for app in app_data:
+#         if app['name'] == desired_object:
+#             return render_template('explore_details.html', details=app, votes=votes, download_dir='apps', image_dir='apps_images')
+
+#     flash('There is no playbook, component, or app with the name {}. Click on one of the playbooks below to explore it.'.format(desired_object), 'error')
+#     return redirect(url_for('explorer_index'))
+
+
+@app.route("/documenter")
+def documenter_index():
+    return render_template("documenter.html")
+
+
+@app.route("/docs", methods=['POST'])
+def document_playbook():
+    if request.form.get('playbook'):
+        html_docs = playbook_documenter.generate_documentation(request.form['playbook'], output_format='html')
+        markdown_docs = playbook_documenter.generate_documentation(request.form['playbook'], output_format='markdown')
+        return render_template("documenter.html", html_docs=html_docs, markdown_docs=markdown_docs)
     else:
-        votes_dict[object_name] = 0
-        update_votes(votes_dict)
-        return 0
+        flash('Please paste the text for a playbook/component to create documentation for it.', 'error')
+        return render_template("documenter.html")
 
-
-@app.route('/explore/<desired_object>')
-def explore_details(desired_object):
-    votes = get_votes(desired_object)
-
-    # TODO: there is probably a better way to determine whether the object is a playbook, component, or playbook app
-    for playbook in playbook_data:
-        if playbook['name'] == desired_object:
-            return render_template('explore_details.html', details=playbook, votes=votes, download_dir='playbooks', image_dir='playbooks_images')
-
-    for component in component_data:
-        if component['name'] == desired_object:
-            return render_template('explore_details.html', details=component, votes=votes, download_dir='components', image_dir='components_images')
-
-    for app in app_data:
-        if app['name'] == desired_object:
-            return render_template('explore_details.html', details=app, votes=votes, download_dir='apps', image_dir='apps_images')
-
-    flash('There is no playbook, component, or app with the name {}. Click on one of the playbooks below to explore it.'.format(desired_object), 'error')
-    return redirect(url_for('explorer_index'))
-
-
-# this needs to be put here so that the app will run properly in heroku
-playbook_data, component_data, app_data = _prepare_data()
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)

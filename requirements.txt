@@ -3,3 +3,4 @@ flask_sqlalchemy
 gunicorn
 pytest
 requests
+git+https://gitlab.com/fhightower-tc/playbook-documenter
