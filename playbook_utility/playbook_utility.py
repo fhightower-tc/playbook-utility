@@ -1,15 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import datetime
 import json
-import os
-try:
-    from StringIO import StringIO as ZipIO
-except:
-    from io import BytesIO as ZipIO
-import tempfile
-import zipfile
 
 from flask import flash, Flask, render_template, redirect, request, url_for
 import playbook_documenter

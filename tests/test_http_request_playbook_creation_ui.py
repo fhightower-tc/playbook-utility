@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import html
 
 from playbook_utility import playbook_utility
 

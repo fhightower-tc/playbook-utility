@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import html
 
 from playbook_utility import playbook_utility
 
@@ -17,7 +16,6 @@ def check_index(response):
     """Make sure the response contains everything that should be in the index."""
     check_heading(response)
     assert "HTTP Request Playbook Creator" in response
-    assert "Explore Publicly Available Playbooks" in response
 
 
 class IndexTestCase(unittest.TestCase):
