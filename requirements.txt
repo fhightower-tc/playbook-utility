@@ -1,5 +1,5 @@
 Flask
-git+https://gitlab.com/fhightower-tc/playbook-documenter
+git+https://gitlab.com/fhightower-tc/playbook-documenter==0.1.1
 gunicorn
 pytest
 requests
